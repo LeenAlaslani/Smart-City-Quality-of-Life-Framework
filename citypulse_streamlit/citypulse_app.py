@@ -391,26 +391,26 @@ def city_profile_page():
             default=old_profile.get("goals", [])
         )
 
-st.subheader("Smart City Areas")
+        st.subheader("Smart City Areas")
 
-selected_modules = st.multiselect(
-    "Choose the areas you want to assess",
-    [
-        "Transportation",
-        "Energy",
-        "Public Services",
-        "Waste Management"
-    ],
-    default=old_profile.get(
-        "selected_modules",
-        [
-            "Transportation",
-            "Energy",
-            "Public Services",
-            "Waste Management"
-        ]
-    )
-)
+        selected_modules = st.multiselect(
+            "Choose the areas you want to assess",
+            [
+                "Transportation",
+                "Energy",
+                "Public Services",
+                "Waste Management"
+            ],
+            default=old_profile.get(
+                "selected_modules",
+                [
+                    "Transportation",
+                    "Energy",
+                    "Public Services",
+                    "Waste Management"
+                ]
+            )
+        )
 
         create_profile = st.form_submit_button(
             "Save City Profile",
@@ -438,7 +438,6 @@ selected_modules = st.multiselect(
 
         else:
             st.error("Please enter the city name and country.")
-
 
 # HOME PAGE
 def home_page():
