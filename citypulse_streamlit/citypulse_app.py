@@ -130,23 +130,27 @@ st.markdown(
     }
 
     .cp-logo-wrap {
-        width: 74px;
-        height: 74px;
-        border-radius: 22px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255,255,255,.13);
-        border: 1px solid rgba(255,255,255,.18);
-        backdrop-filter: blur(12px);
-        font-size: 34px;
-    }
+    width: 180px;
+    height: 95px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    background: rgba(255,255,255,.13);
+    border: 1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+}
 
-    .cp-logo-wrap img {
-        max-width: 54px;
-        max-height: 54px;
-        object-fit: contain;
-    }
+.cp-logo-wrap img {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: contain;
+    transform: scale(1.25);
+}
 
     .cp-eyebrow {
         text-transform: uppercase;
