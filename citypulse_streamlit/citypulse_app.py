@@ -129,18 +129,18 @@ st.markdown(
         z-index: 1;
     }
 
-    .cp-logo-wrap {
-    width: 180px;
-    height: 95px;
-    border-radius: 24px;
+.cp-logo-wrap {
+    width: 250px;
+    height: 125px;
+    border-radius: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 16px;
-    background: rgba(255,255,255,.13);
-    border: 1px solid rgba(255,255,255,.18);
-    backdrop-filter: blur(12px);
+    background: white;
+    border: 1px solid rgba(255,255,255,.30);
+    box-shadow: 0 16px 40px rgba(0,0,0,.14);
     overflow: hidden;
+    padding: 0;
 }
 
 .cp-logo-wrap img {
@@ -149,7 +149,8 @@ st.markdown(
     max-width: none;
     max-height: none;
     object-fit: contain;
-    transform: scale(1.25);
+    transform: scale(1.7);
+    filter: contrast(1.15) saturate(1.15);
 }
 
     .cp-eyebrow {
