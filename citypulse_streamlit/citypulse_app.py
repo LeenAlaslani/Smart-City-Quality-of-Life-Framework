@@ -1,5 +1,8 @@
 import streamlit as st
 
+import joblib
+
+from pathlib import Path
 
 # app settings
 st.set_page_config(
@@ -9,6 +12,25 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# model file location
+BASE_DIR = Path(__file__).resolve().parent
+
+
+# load waste model one time
+@st.cache_resource
+def load_waste_model():
+
+    bundle = joblib.load(
+        BASE_DIR / "models" / "waste_bundle.joblib"
+    )
+
+    return bundle
+
+
+waste_bundle = load_waste_model()
+
+waste_model = waste_bundle["model"]
+waste_features = waste_bundle["feature_columns"]
 
 # app style
 st.markdown(
