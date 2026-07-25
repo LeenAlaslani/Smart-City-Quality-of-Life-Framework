@@ -390,7 +390,7 @@ selected_modules = st.multiselect(
                 "districts": districts,
                 "language": language,
                 "goals": goals,
-                "data_areas": data_areas
+                "selected_modules": selected_modules
             }
 
             st.session_state.profile_ready = True
