@@ -12,25 +12,39 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# model file location
+# app folder
 BASE_DIR = Path(__file__).resolve().parent
 
 
-# load waste model one time
+# load waste model
 @st.cache_resource
-def load_waste_model():
+def load_waste_bundle():
 
-    bundle = joblib.load(
-        BASE_DIR / "models" / "waste_bundle.joblib"
+    model_path = (
+        BASE_DIR
+        / "models"
+        / "waste_bundle.joblib"
     )
 
-    return bundle
+    return joblib.load(model_path)
 
 
-waste_bundle = load_waste_model()
+try:
 
-waste_model = waste_bundle["model"]
-waste_features = waste_bundle["feature_columns"]
+    waste_bundle = load_waste_bundle()
+
+    waste_model = waste_bundle["model"]
+    waste_features = waste_bundle["feature_columns"]
+
+    waste_model_error = None
+
+except Exception as error:
+
+    waste_bundle = None
+    waste_model = None
+    waste_features = None
+
+    waste_model_error = str(error)
 
 # app style
 st.markdown(
@@ -171,6 +185,9 @@ if "city_profile" not in st.session_state:
 
 if "advisor_messages" not in st.session_state:
     st.session_state.advisor_messages = []
+    
+if "waste_result" not in st.session_state:
+    st.session_state.waste_result = None
 
 
 # LOGIN PAGE
@@ -766,7 +783,61 @@ def governance_page():
         )
 
 
-# WASTE PAGE
+
+
+
+
+
+
+
+
+# prepare waste data for the model
+def predict_waste_amount(
+    borough,
+    district,
+    year,
+    month_number,
+    last_month,
+    two_months
+):
+
+    input_data = pd.DataFrame(
+        [
+            {
+                "borough": borough,
+                "communitydistrict": district,
+                "year": year,
+                "month_number": month_number,
+                "waste_last_month": last_month,
+                "waste_2_months_ago": two_months
+            }
+        ]
+    )
+
+    input_data = pd.get_dummies(
+        input_data,
+        columns=[
+            "borough",
+            "communitydistrict"
+        ],
+        drop_first=True,
+        dtype=int
+    )
+
+    input_data = input_data.reindex(
+        columns=waste_features,
+        fill_value=0
+    )
+
+    prediction = waste_model.predict(
+        input_data
+    )[0]
+
+    return float(prediction)
+
+
+
+ # WASTE PAGE
 def waste_page():
 
     st.markdown(
@@ -777,15 +848,29 @@ def waste_page():
                 Predict the expected waste amount
                 and prepare city resources before the next month.
             </p>
-            <span class="demo-badge">Model will be connected next</span>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    st.subheader("Waste Demand Assessment")
+    if waste_model_error:
 
-    with st.form("waste_demo_form"):
+        st.error(
+            "The waste model could not be loaded."
+        )
+
+        with st.expander("Show error"):
+            st.code(waste_model_error)
+
+        return
+
+    st.success(
+        "Waste prediction model is connected."
+    )
+
+    with st.form("waste_prediction_form"):
+
+        st.subheader("Waste Demand Information")
 
         col1, col2 = st.columns(2)
 
@@ -805,12 +890,13 @@ def waste_page():
             district = st.number_input(
                 "Community District",
                 min_value=1,
+                max_value=20,
                 value=1,
                 step=1
             )
 
             month_number = st.selectbox(
-                "Month",
+                "Prediction Month",
                 list(range(1, 13))
             )
 
@@ -819,32 +905,182 @@ def waste_page():
             last_month = st.number_input(
                 "Waste from Last Month",
                 min_value=0.0,
-                value=4000.0
+                value=4000.0,
+                step=100.0
             )
 
             two_months = st.number_input(
                 "Waste from Two Months Ago",
                 min_value=0.0,
-                value=3900.0
+                value=3900.0,
+                step=100.0
             )
 
             year = st.number_input(
                 "Year",
                 min_value=2000,
+                max_value=2035,
                 value=2026,
                 step=1
             )
 
-        waste_button = st.form_submit_button(
-            "Predict Waste",
+        predict_button = st.form_submit_button(
+            "Predict Waste Demand",
             use_container_width=True
         )
 
-    if waste_button:
+    if predict_button:
 
-        st.warning(
-            "The waste model is not connected yet. "
-            "The form is ready for the real model."
+        try:
+
+            prediction = predict_waste_amount(
+                borough=borough,
+                district=district,
+                year=year,
+                month_number=month_number,
+                last_month=last_month,
+                two_months=two_months
+            )
+
+            difference = prediction - last_month
+
+            if last_month > 0:
+
+                change_percent = (
+                    difference / last_month
+                ) * 100
+
+            else:
+
+                change_percent = 0
+
+            if change_percent >= 10:
+
+                status = "High Priority"
+
+                recommendation = (
+                    "Waste demand may increase strongly. "
+                    "Prepare more collection resources "
+                    "and review the collection schedule."
+                )
+
+            elif change_percent >= 5:
+
+                status = "Needs Attention"
+
+                recommendation = (
+                    "Waste demand may increase. "
+                    "Review trucks workers and collection times."
+                )
+
+            else:
+
+                status = "Normal"
+
+                recommendation = (
+                    "The expected waste level is stable. "
+                    "Continue monitoring the district."
+                )
+
+            st.session_state.waste_result = {
+                "borough": borough,
+                "district": district,
+                "month": month_number,
+                "year": year,
+                "prediction": prediction,
+                "difference": difference,
+                "change_percent": change_percent,
+                "status": status,
+                "recommendation": recommendation,
+                "last_month": last_month,
+                "two_months": two_months
+            }
+
+        except Exception as error:
+
+            st.error(
+                "The prediction could not be completed."
+            )
+
+            with st.expander("Show error"):
+                st.code(str(error))
+
+    result = st.session_state.waste_result
+
+    if result:
+
+        st.divider()
+
+        st.subheader("Prediction Result")
+
+        col1, col2, col3 = st.columns(3)
+
+        col1.metric(
+            "Expected Waste",
+            f'{result["prediction"]:,.0f} tons',
+            f'{result["difference"]:+,.0f} tons'
+        )
+
+        col2.metric(
+            "Change from Last Month",
+            f'{result["change_percent"]:+.1f}%'
+        )
+
+        col3.metric(
+            "Planning Status",
+            result["status"]
+        )
+
+        st.subheader("City Recommendation")
+
+        if result["status"] == "High Priority":
+
+            st.error(
+                result["recommendation"]
+            )
+
+        elif result["status"] == "Needs Attention":
+
+            st.warning(
+                result["recommendation"]
+            )
+
+        else:
+
+            st.success(
+                result["recommendation"]
+            )
+
+        chart_data = pd.DataFrame(
+            {
+                "Period": [
+                    "Two Months Ago",
+                    "Last Month",
+                    "Predicted Month"
+                ],
+                "Waste Tons": [
+                    result["two_months"],
+                    result["last_month"],
+                    result["prediction"]
+                ]
+            }
+        ).set_index("Period")
+
+        st.subheader("Waste Change")
+
+        st.line_chart(
+            chart_data,
+            use_container_width=True
+        )
+
+        model_name = waste_bundle.get(
+            "model_name",
+            "Waste Prediction Model"
+        )
+
+        st.caption(
+            f"Prediction created using {model_name}. "
+            "The result is decision support and needs human review."
         )
 
 
