@@ -25,7 +25,7 @@ st.set_page_config(
 BASE_DIR = Path(__file__).resolve().parent
 ASSETS_DIR = BASE_DIR / "assets"
 MODELS_DIR = BASE_DIR / "models"
-LOGO_PATH = ASSETS_DIR / "logo.png"
+LOGO_PATH = ASSETS_DIR / "CityPulse AI.png"
 
 
 # ---------------------------------------------------------
