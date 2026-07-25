@@ -122,7 +122,7 @@ st.markdown(
 
     .cp-hero-grid {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 1fr 250px;
         align-items: center;
         gap: 24px;
         position: relative;
