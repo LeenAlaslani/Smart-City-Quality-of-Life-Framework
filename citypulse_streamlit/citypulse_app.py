@@ -11,6 +11,7 @@ import joblib
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+import streamlit.components.v1 as components
 
 
 # ---------------------------------------------------------
@@ -664,73 +665,105 @@ def city_visual(active_systems: list[str], city_type: str, readiness: int):
 
     city_label = html.escape(city_type)
 
-    st.markdown(
-        f"""
-        <div class="cp-city-shell">
-        <svg viewBox="0 0 760 330" role="img" aria-label="Interactive city illustration">
-            <defs>
-                <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stop-color="#E9F4FF"/>
-                    <stop offset="100%" stop-color="#F9FCFE"/>
-                </linearGradient>
-                <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18364D" flood-opacity="0.12"/>
-                </filter>
-            </defs>
+    city_html = f"""
+    <!doctype html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            * {{ box-sizing: border-box; }}
+            html, body {{
+                margin: 0;
+                padding: 0;
+                background: transparent;
+                overflow: hidden;
+                font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                             "SF Pro Text", "Segoe UI", sans-serif;
+            }}
+            .city-shell {{
+                width: 100%;
+                padding: 14px;
+                border-radius: 27px;
+                background: linear-gradient(180deg, #EDF6FF 0%, #F8FBFD 100%);
+                border: 1px solid rgba(62,120,255,.10);
+                box-shadow: 0 14px 36px rgba(15,45,70,.055);
+                overflow: hidden;
+            }}
+            svg {{
+                display: block;
+                width: 100%;
+                height: auto;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="city-shell">
+            <svg viewBox="0 0 760 330" role="img" aria-label="Interactive city illustration">
+                <defs>
+                    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stop-color="#E9F4FF"/>
+                        <stop offset="100%" stop-color="#F9FCFE"/>
+                    </linearGradient>
+                    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18364D" flood-opacity="0.12"/>
+                    </filter>
+                </defs>
 
-            <rect x="0" y="0" width="760" height="330" rx="24" fill="url(#sky)"/>
-            <circle cx="660" cy="60" r="33" fill="#FFD66B" opacity=".78"/>
-            <path d="M0 245 C120 220, 200 252, 320 232 S560 245,760 220 L760 330 L0 330 Z" fill="#DDEBE5"/>
+                <rect x="0" y="0" width="760" height="330" rx="24" fill="url(#sky)"/>
+                <circle cx="660" cy="60" r="33" fill="#FFD66B" opacity=".78"/>
+                <path d="M0 245 C120 220, 200 252, 320 232 S560 245,760 220 L760 330 L0 330 Z" fill="#DDEBE5"/>
 
-            <g filter="url(#shadow)">
-                <rect x="72" y="132" width="72" height="105" rx="8" fill="#FFFFFF"/>
-                <rect x="91" y="151" width="13" height="13" rx="3" fill="{energy}" opacity=".80"/>
-                <rect x="113" y="151" width="13" height="13" rx="3" fill="{energy}" opacity=".80"/>
-                <rect x="91" y="177" width="13" height="13" rx="3" fill="{energy}" opacity=".80"/>
-                <rect x="113" y="177" width="13" height="13" rx="3" fill="{energy}" opacity=".80"/>
+                <g filter="url(#shadow)">
+                    <rect x="72" y="132" width="72" height="105" rx="8" fill="#FFFFFF"/>
+                    <rect x="91" y="151" width="13" height="13" rx="3" fill="{energy}" opacity=".80"/>
+                    <rect x="113" y="151" width="13" height="13" rx="3" fill="{energy}" opacity=".80"/>
+                    <rect x="91" y="177" width="13" height="13" rx="3" fill="{energy}" opacity=".80"/>
+                    <rect x="113" y="177" width="13" height="13" rx="3" fill="{energy}" opacity=".80"/>
 
-                <rect x="164" y="94" width="93" height="143" rx="10" fill="#FFFFFF"/>
-                <rect x="188" y="119" width="16" height="16" rx="3" fill="{energy}" opacity=".80"/>
-                <rect x="216" y="119" width="16" height="16" rx="3" fill="{energy}" opacity=".80"/>
-                <rect x="188" y="150" width="16" height="16" rx="3" fill="{energy}" opacity=".80"/>
-                <rect x="216" y="150" width="16" height="16" rx="3" fill="{energy}" opacity=".80"/>
+                    <rect x="164" y="94" width="93" height="143" rx="10" fill="#FFFFFF"/>
+                    <rect x="188" y="119" width="16" height="16" rx="3" fill="{energy}" opacity=".80"/>
+                    <rect x="216" y="119" width="16" height="16" rx="3" fill="{energy}" opacity=".80"/>
+                    <rect x="188" y="150" width="16" height="16" rx="3" fill="{energy}" opacity=".80"/>
+                    <rect x="216" y="150" width="16" height="16" rx="3" fill="{energy}" opacity=".80"/>
 
-                <rect x="490" y="117" width="88" height="120" rx="10" fill="#FFFFFF"/>
-                <circle cx="534" cy="151" r="16" fill="{services}" opacity=".88"/>
-                <rect x="512" y="177" width="44" height="10" rx="5" fill="{services}" opacity=".55"/>
+                    <rect x="490" y="117" width="88" height="120" rx="10" fill="#FFFFFF"/>
+                    <circle cx="534" cy="151" r="16" fill="{services}" opacity=".88"/>
+                    <rect x="512" y="177" width="44" height="10" rx="5" fill="{services}" opacity=".55"/>
 
-                <rect x="606" y="154" width="75" height="83" rx="10" fill="#FFFFFF"/>
-                <path d="M627 181 h32 v30 h-32z" fill="{waste}" opacity=".75"/>
-                <path d="M632 174 h22" stroke="{waste}" stroke-width="7" stroke-linecap="round"/>
-            </g>
+                    <rect x="606" y="154" width="75" height="83" rx="10" fill="#FFFFFF"/>
+                    <path d="M627 181 h32 v30 h-32z" fill="{waste}" opacity=".75"/>
+                    <path d="M632 174 h22" stroke="{waste}" stroke-width="7" stroke-linecap="round"/>
+                </g>
 
-            <path d="M20 270 C180 244,260 292,402 260 S620 275,740 252" fill="none" stroke="{mobility}" stroke-width="18" stroke-linecap="round" opacity=".82"/>
-            <path d="M20 270 C180 244,260 292,402 260 S620 275,740 252" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="12 11" opacity=".80"/>
+                <path d="M20 270 C180 244,260 292,402 260 S620 275,740 252" fill="none" stroke="{mobility}" stroke-width="18" stroke-linecap="round" opacity=".82"/>
+                <path d="M20 270 C180 244,260 292,402 260 S620 275,740 252" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="12 11" opacity=".80"/>
 
-            <g>
-                <circle cx="315" cy="259" r="21" fill="{mobility}"/>
-                <circle cx="315" cy="259" r="7" fill="#FFFFFF"/>
-                <circle cx="430" cy="253" r="19" fill="{services}"/>
-                <path d="M430 244 v18 M421 253 h18" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
-                <circle cx="590" cy="265" r="18" fill="{waste}"/>
-                <path d="M582 265 l6 6 11-14" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
+                <g>
+                    <circle cx="315" cy="259" r="21" fill="{mobility}"/>
+                    <circle cx="315" cy="259" r="7" fill="#FFFFFF"/>
+                    <circle cx="430" cy="253" r="19" fill="{services}"/>
+                    <path d="M430 244 v18 M421 253 h18" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+                    <circle cx="590" cy="265" r="18" fill="{waste}"/>
+                    <path d="M582 265 l6 6 11-14" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                </g>
 
-            <rect x="28" y="24" width="210" height="52" rx="17" fill="#FFFFFF" opacity=".92"/>
-            <text x="47" y="47" fill="#163149" font-size="15" font-family="sans-serif" font-weight="700">{city_label}</text>
-            <text x="47" y="66" fill="#6B7D8E" font-size="12" font-family="sans-serif">Readiness {readiness}%</text>
+                <rect x="28" y="24" width="210" height="52" rx="17" fill="#FFFFFF" opacity=".92"/>
+                <text x="47" y="47" fill="#163149" font-size="15" font-family="sans-serif" font-weight="700">{city_label}</text>
+                <text x="47" y="66" fill="#6B7D8E" font-size="12" font-family="sans-serif">Readiness {readiness}%</text>
 
-            <g font-family="sans-serif" font-size="11" font-weight="700">
-                <circle cx="350" cy="43" r="6" fill="{mobility}"/><text x="362" y="47" fill="#536779">Mobility</text>
-                <circle cx="444" cy="43" r="6" fill="{energy}"/><text x="456" y="47" fill="#536779">Energy</text>
-                <circle cx="527" cy="43" r="6" fill="{services}"/><text x="539" y="47" fill="#536779">Services</text>
-                <circle cx="628" cy="43" r="6" fill="{waste}"/><text x="640" y="47" fill="#536779">Waste</text>
-            </g>
-        </svg>
+                <g font-family="sans-serif" font-size="11" font-weight="700">
+                    <circle cx="350" cy="43" r="6" fill="{mobility}"/><text x="362" y="47" fill="#536779">Mobility</text>
+                    <circle cx="444" cy="43" r="6" fill="{energy}"/><text x="456" y="47" fill="#536779">Energy</text>
+                    <circle cx="527" cy="43" r="6" fill="{services}"/><text x="539" y="47" fill="#536779">Services</text>
+                    <circle cx="628" cy="43" r="6" fill="{waste}"/><text x="640" y="47" fill="#536779">Waste</text>
+                </g>
+            </svg>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </body>
+    </html>
+    """
+
+    components.html(city_html, height=390, scrolling=False)
 
 
 # ---------------------------------------------------------
