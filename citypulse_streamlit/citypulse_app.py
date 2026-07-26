@@ -3,6 +3,8 @@ import calendar
 import html
 import json
 import os
+import time
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 
@@ -25,7 +27,11 @@ st.set_page_config(
 BASE_DIR = Path(__file__).resolve().parent
 ASSETS_DIR = BASE_DIR / "assets"
 MODELS_DIR = BASE_DIR / "models"
-LOGO_PATH = ASSETS_DIR / "CityPulse AI.png"
+LOGO_CANDIDATES = [
+    ASSETS_DIR / "CityPulse AI.png",
+    ASSETS_DIR / "logo.png",
+]
+LOGO_PATH = next((path for path in LOGO_CANDIDATES if path.exists()), LOGO_CANDIDATES[0])
 
 
 # ---------------------------------------------------------
@@ -122,36 +128,37 @@ st.markdown(
 
     .cp-hero-grid {
         display: grid;
-        grid-template-columns: 1fr 250px;
+        grid-template-columns: minmax(0, 1fr) 310px;
         align-items: center;
         gap: 24px;
         position: relative;
         z-index: 1;
     }
 
-.cp-logo-wrap {
-    width: 250px;
-    height: 125px;
-    border-radius: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
-    border: 1px solid rgba(255,255,255,.30);
-    box-shadow: 0 16px 40px rgba(0,0,0,.14);
-    overflow: hidden;
-    padding: 0;
-}
+    .cp-logo-wrap {
+        width: 300px;
+        height: 142px;
+        border-radius: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,.94);
+        border: 1px solid rgba(255,255,255,.44);
+        box-shadow: 0 22px 55px rgba(2, 17, 35, .20);
+        backdrop-filter: blur(18px);
+        overflow: hidden;
+        font-size: 40px;
+    }
 
-.cp-logo-wrap img {
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    object-fit: contain;
-    transform: scale(1.7);
-    filter: contrast(1.15) saturate(1.15);
-}
+    .cp-logo-wrap img {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        object-fit: contain;
+        transform: scale(1.82);
+        filter: contrast(1.18) saturate(1.12);
+    }
 
     .cp-eyebrow {
         text-transform: uppercase;
@@ -477,14 +484,182 @@ st.markdown(
         background: rgba(255,255,255,.78);
     }
 
+
+    .cp-card {
+        transition: transform .20s ease, box-shadow .20s ease, border-color .20s ease;
+    }
+
+    .cp-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 24px 58px rgba(16, 44, 72, .13);
+        border-color: rgba(47, 107, 255, .24);
+    }
+
+    .cp-quick-action {
+        padding: 18px 20px;
+        border-radius: 21px;
+        background: rgba(255,255,255,.88);
+        border: 1px solid var(--line);
+        box-shadow: 0 13px 32px rgba(16, 44, 72, .055);
+        min-height: 112px;
+    }
+
+    .cp-quick-action strong {
+        display: block;
+        font-size: 16px;
+        color: var(--ink);
+        margin-bottom: 6px;
+    }
+
+    .cp-quick-action span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .cp-attention {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20px;
+        align-items: center;
+        padding: 24px 26px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(236,246,249,.96));
+        border: 1px solid var(--line);
+        box-shadow: 0 16px 42px rgba(16, 44, 72, .065);
+        margin: 15px 0 24px 0;
+    }
+
+    .cp-attention-label {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 850;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        margin-bottom: 7px;
+    }
+
+    .cp-attention h3 {margin:0 0 7px 0;font-size:24px;}
+    .cp-attention p {margin:0;color:var(--muted);line-height:1.55;}
+
+    .cp-attention-status {
+        min-width: 122px;
+        text-align: center;
+        padding: 16px 18px;
+        border-radius: 19px;
+        background: #EAF7F0;
+        color: #087354;
+        font-weight: 850;
+    }
+
+    .cp-module-meta {
+        display:flex;
+        justify-content:space-between;
+        gap:12px;
+        color:var(--muted);
+        font-size:12px;
+        margin-top:16px;
+        padding-top:14px;
+        border-top:1px solid var(--line);
+    }
+
+    .cp-stepper-v3 {
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:10px;
+        margin:10px 0 24px 0;
+    }
+
+    .cp-step-v3 {
+        position:relative;
+        padding:15px 16px;
+        border-radius:18px;
+        border:1px solid var(--line);
+        background:rgba(255,255,255,.75);
+        color:var(--muted);
+        font-size:13px;
+        font-weight:800;
+    }
+
+    .cp-step-v3.active {
+        background:linear-gradient(135deg,#102D50,#0B6C70);
+        color:white;
+        box-shadow:0 14px 30px rgba(16,58,78,.17);
+    }
+
+    .cp-step-v3.done {
+        background:#EAF7F0;
+        color:#087354;
+        border-color:rgba(8,115,84,.12);
+    }
+
+    .cp-result-grid {
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:12px;
+        margin-top:14px;
+    }
+
+    .cp-result-row {
+        padding:17px 18px;
+        border-radius:18px;
+        background:white;
+        border:1px solid var(--line);
+    }
+
+    .cp-result-row small {display:block;color:var(--muted);font-weight:750;margin-bottom:6px;}
+    .cp-result-row strong {font-size:17px;color:var(--ink);}
+
+    .cp-scenario {
+        border-radius:25px;
+        padding:24px;
+        background:linear-gradient(145deg,#F9FBFF,#EEF7F7);
+        border:1px solid var(--line);
+        box-shadow:0 14px 38px rgba(16,44,72,.055);
+    }
+
+    .cp-scenario-result {
+        padding:20px;
+        border-radius:20px;
+        background:white;
+        border:1px solid var(--line);
+        margin-top:14px;
+    }
+
+    .cp-action-center-item {
+        border-radius:21px;
+        padding:19px 20px;
+        background:rgba(255,255,255,.91);
+        border:1px solid var(--line);
+        box-shadow:0 12px 30px rgba(16,44,72,.045);
+        margin-bottom:10px;
+    }
+
+    .cp-action-center-item.reviewed {opacity:.64;}
+    .cp-action-center-item h4 {margin:0 0 5px 0;color:var(--ink);}
+    .cp-action-center-item p {margin:0;color:var(--muted);font-size:13px;line-height:1.5;}
+
+    .cp-view-note {
+        border-left:4px solid #2F6BFF;
+        padding:12px 15px;
+        border-radius:0 14px 14px 0;
+        background:#EEF4FF;
+        color:#34517E;
+        font-size:13px;
+        margin-bottom:17px;
+    }
+
     @media (max-width: 760px) {
         .main .block-container {padding: 1.2rem .8rem 4rem .8rem;}
         .cp-hero {padding: 28px 24px;border-radius:24px;}
         .cp-hero-grid {grid-template-columns:1fr;}
-        .cp-logo-wrap {display:none;}
+        .cp-logo-wrap {width:100%;height:110px;margin-top:10px;}
         .cp-page-head {padding:22px;border-radius:21px;}
         .cp-page-head h1 {font-size:29px;}
         .cp-stepper {grid-template-columns:1fr;}
+        .cp-stepper-v3 {grid-template-columns:1fr;}
+        .cp-result-grid {grid-template-columns:1fr;}
+        .cp-attention {grid-template-columns:1fr;}
         .cp-decision h2 {font-size:28px;}
     }
     </style>
@@ -508,11 +683,24 @@ DEFAULT_STATE = {
     "energy_result": None,
     "governance_result": None,
     "advisor_messages": [],
+    "view_mode": "Executive View",
+    "waste_step": 1,
+    "waste_inputs": {
+        "borough": "Bronx",
+        "district": 1,
+        "two_months": 3900.0,
+        "last_month": 4000.0,
+        "month_name": "January",
+        "year": 2026,
+    },
+    "action_center": [],
+    "waste_ai_answer": "",
+    "waste_ai_source": "",
 }
 
 for key, value in DEFAULT_STATE.items():
     if key not in st.session_state:
-        st.session_state[key] = value
+        st.session_state[key] = deepcopy(value)
 
 
 # ---------------------------------------------------------
@@ -676,6 +864,239 @@ def active_results() -> list[dict]:
         "waste_result",
     ]
     return [st.session_state[key] for key in result_keys if st.session_state.get(key)]
+
+
+
+def segmented(label: str, options: list[str], key: str, default: str) -> str:
+    """Use the modern segmented control with a safe fallback."""
+    if key not in st.session_state:
+        st.session_state[key] = default
+
+    if hasattr(st, "segmented_control"):
+        value = st.segmented_control(
+            label,
+            options,
+            default=st.session_state[key],
+            key=f"{key}_widget",
+            label_visibility="collapsed",
+        )
+    else:
+        value = st.radio(
+            label,
+            options,
+            index=options.index(st.session_state[key]),
+            horizontal=True,
+            key=f"{key}_widget",
+            label_visibility="collapsed",
+        )
+
+    if value:
+        st.session_state[key] = value
+    return st.session_state[key]
+
+
+def pill_choice(label: str, options: list[str], key: str, default: str | None = None):
+    if hasattr(st, "pills"):
+        return st.pills(label, options, default=default, key=key, label_visibility="collapsed")
+    return st.selectbox(
+        label,
+        options,
+        index=options.index(default) if default in options else 0,
+        key=key,
+        label_visibility="collapsed",
+    )
+
+
+def module_snapshot(module: str) -> tuple[str, str]:
+    result_map = {
+        "transportation": st.session_state.transportation_result,
+        "energy": st.session_state.energy_result,
+        "governance": st.session_state.governance_result,
+        "waste": st.session_state.waste_result,
+    }
+    result = result_map.get(module)
+
+    if result:
+        label = result.get("status", result.get("priority", "Completed"))
+        updated = result.get("created_at", "Current session")
+        return str(label), str(updated)
+
+    if module_found(module):
+        return "Ready for assessment", "Model connected"
+
+    return "Setup needed", "Model not connected"
+
+
+def ensure_action(action_id: str, module: str, title: str, detail: str, priority: str = "Medium", status: str = "Open"):
+    existing = next(
+        (item for item in st.session_state.action_center if item["id"] == action_id),
+        None,
+    )
+
+    if existing:
+        existing.update({"module": module, "title": title, "detail": detail})
+        return
+
+    st.session_state.action_center.append(
+        {
+            "id": action_id,
+            "module": module,
+            "title": title,
+            "detail": detail,
+            "priority": priority,
+            "status": status,
+            "note": "",
+            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        }
+    )
+
+
+def sync_action_center():
+    waste = st.session_state.waste_result
+
+    if waste:
+        ensure_action(
+            "waste_latest",
+            "Waste Management",
+            waste["actions"][0][0],
+            waste["actions"][0][1],
+            priority=waste["priority"] if waste["priority"] in ["Low", "Medium", "High"] else "Medium",
+        )
+
+    setup_items = [
+        ("transport_setup", "Transportation", "Connect the transportation model", "Complete the mobility-risk assessment setup."),
+        ("energy_setup", "Energy", "Connect the energy model", "Enable building-demand forecasts and peak-period planning."),
+        ("governance_setup", "Public Services", "Connect the public-services model", "Enable early identification of requests needing attention."),
+    ]
+
+    for action_id, module, title, detail in setup_items:
+        module_key = {
+            "Transportation": "transportation",
+            "Energy": "energy",
+            "Public Services": "governance",
+        }[module]
+        if not module_found(module_key):
+            ensure_action(action_id, module, title, detail, priority="Medium", status="Waiting")
+
+
+def add_waste_action_to_center():
+    result = st.session_state.waste_result
+    if not result:
+        return
+
+    ensure_action(
+        "waste_latest",
+        "Waste Management",
+        result["actions"][0][0],
+        result["actions"][0][1],
+        priority=result["priority"] if result["priority"] in ["Low", "Medium", "High"] else "Medium",
+    )
+    st.toast("Action added to the City Action Center", icon="✅")
+
+
+def render_action_center(limit: int = 5):
+    sync_action_center()
+    items = st.session_state.action_center[:limit]
+
+    if not items:
+        empty_state("✅", "No open city actions", "Complete an assessment to create the first operational action.")
+        return
+
+    for index, item in enumerate(items):
+        css_class = "reviewed" if item["status"] == "Reviewed" else ""
+        st.markdown(
+            f"""
+            <div class="cp-action-center-item {css_class}">
+                <h4>{html.escape(item['module'])} — {html.escape(item['title'])}</h4>
+                <p>{html.escape(item['detail'])}</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        c1, c2, c3 = st.columns([1.1, 1, 1])
+        with c1:
+            priority_options = ["Low", "Medium", "High"]
+            item["priority"] = st.selectbox(
+                "Priority",
+                priority_options,
+                index=priority_options.index(item.get("priority", "Medium")),
+                key=f"action_priority_{item['id']}",
+                label_visibility="collapsed",
+            )
+        with c2:
+            button_label = "Reopen" if item["status"] == "Reviewed" else "Mark reviewed"
+            if st.button(button_label, key=f"action_review_{item['id']}", use_container_width=True):
+                item["status"] = "Open" if item["status"] == "Reviewed" else "Reviewed"
+                st.rerun()
+        with c3:
+            with st.popover("Add note", use_container_width=True):
+                note = st.text_area(
+                    "Action note",
+                    value=item.get("note", ""),
+                    key=f"action_note_{item['id']}",
+                    label_visibility="collapsed",
+                )
+                if st.button("Save note", key=f"save_note_{item['id']}", use_container_width=True):
+                    item["note"] = note
+                    st.toast("Note saved", icon="📝")
+
+
+def render_waste_stepper(active_step: int):
+    labels = ["Select area", "Add recent data", "Review forecast"]
+    cards = []
+    for number, label in enumerate(labels, start=1):
+        if number < active_step:
+            css_class = "done"
+            prefix = "✓"
+        elif number == active_step:
+            css_class = "active"
+            prefix = str(number)
+        else:
+            css_class = ""
+            prefix = str(number)
+        cards.append(f'<div class="cp-step-v3 {css_class}">{prefix} · {html.escape(label)}</div>')
+
+    st.markdown(
+        '<div class="cp-stepper-v3">' + "".join(cards) + "</div>",
+        unsafe_allow_html=True,
+    )
+
+
+def scenario_outlook(result: dict, increase: int, workforce: str, vehicle_capacity: str) -> dict:
+    adjusted_volume = result["prediction"] * (1 + increase / 100)
+    pressure_points = 0
+
+    if increase >= 10:
+        pressure_points += 1
+    if workforce == "Limited":
+        pressure_points += 1
+    if vehicle_capacity == "Limited":
+        pressure_points += 1
+    if workforce == "Strong":
+        pressure_points -= 1
+    if vehicle_capacity == "Extra capacity":
+        pressure_points -= 1
+
+    if pressure_points >= 2:
+        status = "Additional resources may be needed"
+        detail = "The test scenario combines higher demand with limited operational capacity. Review staffing and vehicle availability before the month begins."
+        level = "High"
+    elif pressure_points == 1:
+        status = "A small operational buffer is recommended"
+        detail = "Current resources may be sufficient, but keeping backup capacity available would reduce planning risk."
+        level = "Medium"
+    else:
+        status = "Current capacity appears sufficient"
+        detail = "The selected workforce and vehicle capacity appear able to support this planning scenario."
+        level = "Low"
+
+    return {
+        "volume": adjusted_volume,
+        "status": status,
+        "detail": detail,
+        "level": level,
+    }
 
 
 # ---------------------------------------------------------
@@ -969,6 +1390,85 @@ def ask_city_advisor(question: str) -> tuple[str, str]:
         return f"{fallback}\n\n_AI service fallback: {error}_", "Smart guidance"
 
 
+
+# ---------------------------------------------------------
+# INTERACTIVE DIALOGS
+# ---------------------------------------------------------
+@st.dialog("Run a city assessment")
+def city_assessment_dialog():
+    st.write("Choose the city area you want to assess now.")
+    choice = pill_choice(
+        "Assessment area",
+        ["Transportation", "Energy", "Public Services", "Waste Management"],
+        key="assessment_dialog_choice",
+        default="Waste Management",
+    )
+
+    module_map = {
+        "Transportation": ("transportation", "Mobility-risk planning"),
+        "Energy": ("energy", "Building-demand planning"),
+        "Public Services": ("governance", "Service-priority planning"),
+        "Waste Management": ("waste", "Monthly waste planning"),
+    }
+    module_key, description = module_map[choice]
+
+    st.markdown(f"**{description}**")
+    if module_found(module_key):
+        st.success("The model file is connected and ready.")
+    else:
+        st.warning("This workspace is ready, but its model file is not connected yet.")
+
+    if st.button("Open selected workspace", use_container_width=True, type="primary"):
+        page_map = {
+            "Transportation": transportation_page_link,
+            "Energy": energy_page_link,
+            "Public Services": governance_page_link,
+            "Waste Management": waste_page_link,
+        }
+        st.switch_page(page_map[choice])
+
+
+@st.dialog("Ask AI about this result")
+def waste_ai_dialog():
+    result = st.session_state.waste_result
+    if not result:
+        st.info("Create a waste forecast first.")
+        return
+
+    st.caption(
+        f"{result['borough']}, District {result['district']} · "
+        f"{result['month_name']} {result['year']}"
+    )
+
+    prompt_options = [
+        "Why is this result important?",
+        "What should the city do next?",
+        "Create a short action plan",
+        "Explain this to a city manager",
+    ]
+    selected_prompt = pill_choice(
+        "Suggested question",
+        prompt_options,
+        key="waste_ai_prompt",
+        default=prompt_options[0],
+    )
+    custom_question = st.text_input(
+        "Or ask your own question",
+        placeholder="What is the main planning risk?",
+    )
+
+    if st.button("Generate guidance", use_container_width=True, type="primary"):
+        question = custom_question.strip() or selected_prompt
+        with st.spinner("Preparing stakeholder guidance..."):
+            answer, source = ask_city_advisor(question)
+        st.session_state.waste_ai_answer = answer
+        st.session_state.waste_ai_source = source
+
+    if st.session_state.waste_ai_answer:
+        st.markdown(st.session_state.waste_ai_answer)
+        st.caption(st.session_state.waste_ai_source)
+
+
 # ---------------------------------------------------------
 # REPORT HELPERS
 # ---------------------------------------------------------
@@ -1217,109 +1717,139 @@ def home_page():
 
     hero(
         f'{profile["city_name"]} Command Center',
-        "A clear executive view of the city areas, latest assessments and recommended next actions.",
+        "What should the city focus on next? Run an assessment, review the latest priority or turn results into an executive action plan.",
         eyebrow=f'WELCOME, {st.session_state.user_name.upper()}',
         badge=f"{connected_count} of 4 model files connected",
     )
 
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        kpi_card("Population", f'{profile["population"]:,}', "City profile")
-    with c2:
-        kpi_card("Districts", str(profile["districts"]), "Planning areas")
-    with c3:
-        kpi_card("Completed assessments", str(len(active_results())), "Current session")
-    with c4:
-        priority = waste["priority"] if waste else "Not assessed"
-        kpi_card("Latest priority", priority, "Based on completed assessments")
-
-    st.markdown("### Smart-city workspaces")
-    selected = profile.get("selected_modules", [])
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        status = "Model file found" if module_found("transportation") else "Setup needed"
-        module_card(
-            "🚦",
-            "Transportation",
-            "Anticipate higher-risk conditions and support safer mobility planning.",
-            status,
-            "live" if module_found("transportation") else "waiting",
+    action1, action2, action3 = st.columns(3)
+    with action1:
+        st.markdown(
+            '<div class="cp-quick-action"><strong>🧭 Run City Assessment</strong><span>Choose one smart-city area and begin a guided assessment.</span></div>',
+            unsafe_allow_html=True,
         )
-        if "Transportation" in selected and st.button("Open transportation", key="home_transport", use_container_width=True):
-            st.switch_page(transportation_page_link)
-
-    with col2:
-        status = "Model file found" if module_found("energy") else "Setup needed"
-        module_card(
-            "⚡",
-            "Energy",
-            "Forecast building demand and prepare for peak consumption periods.",
-            status,
-            "live" if module_found("energy") else "waiting",
+        if st.button("Start assessment", key="home_run_assessment", use_container_width=True):
+            city_assessment_dialog()
+    with action2:
+        st.markdown(
+            '<div class="cp-quick-action"><strong>✨ Ask AI Advisor</strong><span>Explain a completed result and prepare simple next actions.</span></div>',
+            unsafe_allow_html=True,
         )
-        if "Energy" in selected and st.button("Open energy", key="home_energy", use_container_width=True):
-            st.switch_page(energy_page_link)
-
-    with col3:
-        status = "Model file found" if module_found("governance") else "Setup needed"
-        module_card(
-            "🏛️",
-            "Public Services",
-            "Identify service requests that may need earlier attention.",
-            status,
-            "live" if module_found("governance") else "waiting",
+        if st.button("Open advisor", key="home_open_advisor", use_container_width=True):
+            st.switch_page(advisor_page_link)
+    with action3:
+        st.markdown(
+            '<div class="cp-quick-action"><strong>📄 Executive Report</strong><span>Turn city findings into a stakeholder-ready summary.</span></div>',
+            unsafe_allow_html=True,
         )
-        if "Public Services" in selected and st.button("Open public services", key="home_governance", use_container_width=True):
-            st.switch_page(governance_page_link)
+        if st.button("Create report", key="home_open_report", use_container_width=True):
+            st.switch_page(reports_page_link)
 
-    with col4:
-        status = "Live forecast" if WASTE_MODEL is not None else "Setup needed"
-        module_card(
-            "♻️",
-            "Waste Planning",
-            "Forecast monthly collection demand and turn the result into an operational plan.",
-            status,
-            "live" if WASTE_MODEL is not None else "waiting",
+    st.write("")
+    mode = segmented(
+        "Workspace view",
+        ["Executive View", "Analyst View"],
+        key="view_mode",
+        default="Executive View",
+    )
+
+    if mode == "Executive View":
+        st.markdown(
+            '<div class="cp-view-note"><strong>Executive View:</strong> focuses on the city priority, decision and recommended action.</div>',
+            unsafe_allow_html=True,
         )
-        if "Waste Management" in selected and st.button("Open waste planning", key="home_waste", use_container_width=True):
-            st.switch_page(waste_page_link)
 
-    st.markdown("### Executive brief")
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            kpi_card("Connected models", f"{connected_count} / 4", "Current prototype")
+        with c2:
+            kpi_card("Completed assessments", str(len(active_results())), "Current session")
+        with c3:
+            priority = waste["priority"] if waste else "Waiting"
+            kpi_card("Latest priority", priority, "From completed results")
+        with c4:
+            kpi_card("Planning areas", str(profile["districts"]), profile["city_name"])
 
-    if waste:
-        left, right = st.columns([1.25, 0.75], gap="large")
-
-        with left:
+        if waste:
             st.markdown(
                 f"""
-                <div class="cp-decision">
-                    <div class="label">LATEST OPERATIONAL OUTLOOK</div>
-                    <h2>{html.escape(waste['headline'])}</h2>
-                    <p>
-                        {html.escape(waste['borough'])}, District {waste['district']} ·
-                        {html.escape(waste['month_name'])} {waste['year']} ·
-                        Expected volume {waste['prediction']:,.0f} tons
-                    </p>
+                <div class="cp-attention">
+                    <div>
+                        <div class="cp-attention-label">WHAT NEEDS ATTENTION NOW?</div>
+                        <h3>{html.escape(waste['headline'])}</h3>
+                        <p>{html.escape(waste['summary'])}</p>
+                    </div>
+                    <div class="cp-attention-status">{html.escape(waste['priority'])} priority</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                """
+                <div class="cp-attention">
+                    <div>
+                        <div class="cp-attention-label">WHAT NEEDS ATTENTION NOW?</div>
+                        <h3>Complete the first city assessment.</h3>
+                        <p>CityPulse will replace technical model output with a clear priority, decision and action plan.</p>
+                    </div>
+                    <div class="cp-attention-status">Waiting</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
-        with right:
-            with st.container(border=True):
-                st.markdown("#### Recommended next action")
-                st.write(waste["actions"][0][0])
-                st.caption(waste["actions"][0][1])
-                if st.button("Ask the AI advisor", use_container_width=True):
-                    st.switch_page(advisor_page_link)
     else:
-        empty_state(
-            "✨",
-            "Start the first city assessment",
-            "Run a smart-city module to replace technical model output with a clear forecast, priority level and action plan.",
+        st.markdown(
+            '<div class="cp-view-note"><strong>Analyst View:</strong> shows model readiness, completed runs and data-level details.</div>',
+            unsafe_allow_html=True,
         )
+        readiness = pd.DataFrame(
+            [
+                {
+                    "Module": label,
+                    "Model connected": "Yes" if module_found(key) else "No",
+                    "Latest result": module_snapshot(key)[0],
+                    "Updated": module_snapshot(key)[1],
+                }
+                for key, label in [
+                    ("transportation", "Transportation"),
+                    ("energy", "Energy"),
+                    ("governance", "Public Services"),
+                    ("waste", "Waste Management"),
+                ]
+            ]
+        )
+        st.dataframe(readiness, use_container_width=True, hide_index=True)
+        if st.session_state.prediction_history:
+            st.caption(f"Prediction runs in this session: {len(st.session_state.prediction_history)}")
+
+    st.markdown("### Smart-city workspaces")
+    selected = profile.get("selected_modules", [])
+    workspace_cols = st.columns(4)
+    workspace_data = [
+        ("transportation", "Transportation", "🚦", "Anticipate higher-risk conditions and support safer mobility planning.", transportation_page_link),
+        ("energy", "Energy", "⚡", "Forecast building demand and prepare for peak consumption periods.", energy_page_link),
+        ("governance", "Public Services", "🏛️", "Identify service requests that may need earlier attention.", governance_page_link),
+        ("waste", "Waste Planning", "♻️", "Forecast collection demand and turn it into an operational plan.", waste_page_link),
+    ]
+
+    for column, (module_key, title, icon, description, page_link) in zip(workspace_cols, workspace_data):
+        with column:
+            latest_status, latest_update = module_snapshot(module_key)
+            status_class = "live" if module_found(module_key) else "waiting"
+            module_card(icon, title, description, latest_status, status_class)
+            st.markdown(
+                f'<div class="cp-module-meta"><span>{html.escape(latest_status)}</span><span>{html.escape(latest_update)}</span></div>',
+                unsafe_allow_html=True,
+            )
+            allowed = title in selected or (title == "Waste Planning" and "Waste Management" in selected)
+            if allowed and st.button("Open workspace", key=f"open_{module_key}_workspace", use_container_width=True):
+                st.switch_page(page_link)
+
+    st.markdown("### City Action Center")
+    st.caption("Review, prioritize and add notes to the next city actions.")
+    render_action_center(limit=5)
 
 
 def transportation_page():
@@ -1406,7 +1936,6 @@ def waste_page():
             "Model not connected",
             "waiting",
         )
-
         error = MODEL_ERRORS.get("waste")
         empty_state(
             "📦",
@@ -1421,160 +1950,272 @@ def waste_page():
     page_header(
         "♻️",
         "Waste Planning",
-        "Forecast monthly collection demand and turn it into a clear resource-planning decision.",
+        "Move from recent collection data to a clear monthly resource-planning decision.",
         "Live model",
         "live",
     )
 
-    st.markdown(
-        """
-        <div class="cp-stepper">
-            <div class="cp-step"><b>1</b> Choose the planning area</div>
-            <div class="cp-step"><b>2</b> Add recent collection volumes</div>
-            <div class="cp-step"><b>3</b> Select the forecast period</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    mode = segmented(
+        "Waste workspace view",
+        ["Executive View", "Analyst View"],
+        key="view_mode",
+        default="Executive View",
     )
 
-    tab1, tab2, tab3 = st.tabs(["Area", "Recent demand", "Forecast period"])
+    render_waste_stepper(st.session_state.waste_step)
+    inputs = st.session_state.waste_inputs
 
-    with tab1:
-        c1, c2 = st.columns(2)
-        with c1:
-            borough = st.selectbox(
-                "Borough",
-                ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"],
-                help="Select the borough represented in the training data.",
-            )
-        with c2:
-            district = st.number_input(
-                "Community district",
-                min_value=1,
-                max_value=20,
-                value=1,
-                step=1,
-            )
-        st.caption("This identifies the local collection area for the forecast.")
+    if st.session_state.waste_step == 1:
+        with st.container(border=True):
+            st.markdown("### Step 1 — Select the planning area")
+            st.caption("Choose the local area the municipality wants to prepare for.")
+            c1, c2 = st.columns(2)
+            with c1:
+                inputs["borough"] = st.selectbox(
+                    "Borough",
+                    ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"],
+                    index=["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"].index(inputs.get("borough", "Bronx")),
+                )
+            with c2:
+                inputs["district"] = int(
+                    st.number_input(
+                        "Community district",
+                        min_value=1,
+                        max_value=20,
+                        value=int(inputs.get("district", 1)),
+                        step=1,
+                    )
+                )
 
-    with tab2:
-        c1, c2 = st.columns(2)
-        with c1:
-            two_months = st.number_input(
-                "Waste collected two months ago",
-                min_value=0.0,
-                value=3900.0,
-                step=50.0,
-                format="%.0f",
-            )
-        with c2:
-            last_month = st.number_input(
-                "Waste collected last month",
-                min_value=0.0,
-                value=4000.0,
-                step=50.0,
-                format="%.0f",
-            )
-        st.caption("Use actual collected waste in tons. Recent values help the model understand the local trend.")
+            st.info(f"Planning area: {inputs['borough']} · District {inputs['district']}")
+            if st.button("Continue to recent data", use_container_width=True, type="primary"):
+                st.session_state.waste_step = 2
+                st.rerun()
 
-    with tab3:
-        c1, c2 = st.columns(2)
-        with c1:
-            month_name = st.selectbox("Forecast month", list(calendar.month_name)[1:])
-            month_number = list(calendar.month_name).index(month_name)
-        with c2:
-            year = st.number_input(
-                "Forecast year",
-                min_value=2000,
-                max_value=2035,
-                value=2026,
-                step=1,
-            )
-        st.caption("Choose the month the municipality wants to prepare for.")
+    elif st.session_state.waste_step == 2:
+        with st.container(border=True):
+            st.markdown("### Step 2 — Add recent collection data")
+            st.caption("Use the actual waste collected in the last two months.")
+            c1, c2 = st.columns(2)
+            with c1:
+                inputs["two_months"] = float(
+                    st.number_input(
+                        "Waste collected two months ago",
+                        min_value=0.0,
+                        value=float(inputs.get("two_months", 3900.0)),
+                        step=50.0,
+                        format="%.0f",
+                    )
+                )
+            with c2:
+                inputs["last_month"] = float(
+                    st.number_input(
+                        "Waste collected last month",
+                        min_value=0.0,
+                        value=float(inputs.get("last_month", 4000.0)),
+                        step=50.0,
+                        format="%.0f",
+                    )
+                )
 
-    st.write("")
-    c1, c2, c3 = st.columns([1, 1.4, 1])
-    with c2:
-        run_forecast = st.button(
-            "Generate monthly waste plan",
-            use_container_width=True,
-            type="primary",
-        )
+            recent_change = inputs["last_month"] - inputs["two_months"]
+            st.caption(f"Recent movement: {recent_change:+,.0f} tons")
+            back, next_step = st.columns(2)
+            with back:
+                if st.button("Back", use_container_width=True):
+                    st.session_state.waste_step = 1
+                    st.rerun()
+            with next_step:
+                if st.button("Continue to forecast", use_container_width=True, type="primary"):
+                    st.session_state.waste_step = 3
+                    st.rerun()
 
-    if run_forecast:
-        try:
-            result = run_waste_prediction(
-                borough=borough,
-                district=int(district),
-                year=int(year),
-                month_number=int(month_number),
-                last_month=float(last_month),
-                two_months=float(two_months),
+    else:
+        with st.container(border=True):
+            st.markdown("### Step 3 — Review and generate the forecast")
+            st.caption("Confirm the planning period, then let CityPulse create the decision brief.")
+            c1, c2 = st.columns(2)
+            with c1:
+                month_options = list(calendar.month_name)[1:]
+                inputs["month_name"] = st.selectbox(
+                    "Forecast month",
+                    month_options,
+                    index=month_options.index(inputs.get("month_name", "January")),
+                )
+                month_number = month_options.index(inputs["month_name"]) + 1
+            with c2:
+                inputs["year"] = int(
+                    st.number_input(
+                        "Forecast year",
+                        min_value=2000,
+                        max_value=2035,
+                        value=int(inputs.get("year", 2026)),
+                        step=1,
+                    )
+                )
+
+            st.markdown(
+                f"""
+                <div class="cp-result-grid">
+                    <div class="cp-result-row"><small>Planning area</small><strong>{html.escape(inputs['borough'])} · District {inputs['district']}</strong></div>
+                    <div class="cp-result-row"><small>Forecast period</small><strong>{html.escape(inputs['month_name'])} {inputs['year']}</strong></div>
+                    <div class="cp-result-row"><small>Two months ago</small><strong>{inputs['two_months']:,.0f} tons</strong></div>
+                    <div class="cp-result-row"><small>Last month</small><strong>{inputs['last_month']:,.0f} tons</strong></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
-            st.session_state.waste_result = result
-            st.session_state.prediction_history.append(result)
-            st.toast("Waste plan generated", icon="✅")
-        except Exception as error:
-            st.error("The waste plan could not be generated.")
-            with st.expander("Technical details"):
-                st.code(str(error))
+
+            back, run = st.columns([1, 1.5])
+            with back:
+                if st.button("Back to recent data", use_container_width=True):
+                    st.session_state.waste_step = 2
+                    st.rerun()
+            with run:
+                run_forecast = st.button(
+                    "Generate monthly decision brief",
+                    use_container_width=True,
+                    type="primary",
+                )
+
+        if run_forecast:
+            try:
+                with st.status("Preparing the city forecast...", expanded=True) as status:
+                    status.write("Checking the district information")
+                    time.sleep(0.25)
+                    status.write("Running the waste-demand model")
+                    result = run_waste_prediction(
+                        borough=inputs["borough"],
+                        district=int(inputs["district"]),
+                        year=int(inputs["year"]),
+                        month_number=int(month_number),
+                        last_month=float(inputs["last_month"]),
+                        two_months=float(inputs["two_months"]),
+                    )
+                    time.sleep(0.25)
+                    status.write("Creating the stakeholder recommendation")
+                    time.sleep(0.2)
+                    status.update(label="Forecast ready", state="complete", expanded=False)
+
+                st.session_state.waste_result = result
+                st.session_state.prediction_history.append(result)
+                add_waste_action_to_center()
+                st.toast("Waste decision brief created", icon="✅")
+            except Exception as error:
+                st.error("The waste plan could not be generated.")
+                with st.expander("Technical details"):
+                    st.code(str(error))
 
     result = st.session_state.waste_result
-
     if not result:
         st.write("")
         empty_state(
             "🧭",
-            "Your planning result will appear here",
-            "CityPulse will translate the model forecast into a clear outlook, priority level and recommended city actions.",
+            "Complete the three planning steps",
+            "The final result will focus on the decision, why it matters and the next city actions — not only the prediction number.",
         )
         return
 
-    st.markdown(
-        f"""
-        <div class="cp-decision">
-            <div class="label">MONTHLY PLANNING OUTLOOK</div>
-            <h2>{html.escape(result['headline'])}</h2>
-            <p>
-                {html.escape(result['borough'])}, District {result['district']} ·
-                {html.escape(result['month_name'])} {result['year']} ·
-                Planning priority: {html.escape(result['priority'])}
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.divider()
 
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        kpi_card("Expected collection", f'{result["prediction"]:,.0f} tons', "Forecast volume")
-    with c2:
-        kpi_card("Change from last month", f'{result["change_percent"]:+.1f}%', f'{result["difference"]:+,.0f} tons')
-    with c3:
-        kpi_card("Planning status", result["status"], "Operational outlook")
-    with c4:
-        kpi_card("Forecast period", f'{result["month_name"]} {result["year"]}', f'{result["borough"]} · D{result["district"]}')
+    if mode == "Executive View":
+        st.markdown(
+            f"""
+            <div class="cp-decision">
+                <div class="label">EXECUTIVE DECISION</div>
+                <h2>{html.escape(result['headline'])}</h2>
+                <p>{html.escape(result['summary'])}</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    st.markdown("### What this means for the city")
-    left, right = st.columns([0.9, 1.1], gap="large")
+        st.markdown(
+            f"""
+            <div class="cp-result-grid">
+                <div class="cp-result-row"><small>Forecast</small><strong>{result['prediction']:,.0f} tons</strong></div>
+                <div class="cp-result-row"><small>Expected trend</small><strong>{result['change_percent']:+.1f}% from last month</strong></div>
+                <div class="cp-result-row"><small>Priority</small><strong>{html.escape(result['priority'])}</strong></div>
+                <div class="cp-result-row"><small>Main decision</small><strong>{html.escape(result['actions'][0][0])}</strong></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    with left:
-        with st.container(border=True):
-            st.markdown("#### Why it matters")
-            st.write(result["summary"])
-            st.markdown("#### Recommended actions")
-            for index, (title, text) in enumerate(result["actions"], start=1):
-                action_item(index, title, text)
+        st.markdown("### Recommended next actions")
+        for index, (title, detail) in enumerate(result["actions"], start=1):
+            action_item(index, title, detail)
 
-    with right:
-        with st.container(border=True):
-            st.markdown("#### Demand movement")
-            st.caption("Actual recent collection compared with the next-month forecast")
-            waste_chart(result)
+        a1, a2, a3 = st.columns(3)
+        with a1:
+            if st.button("Add to Action Plan", use_container_width=True):
+                add_waste_action_to_center()
+        with a2:
+            if st.button("Ask AI About This", use_container_width=True):
+                waste_ai_dialog()
+        with a3:
+            if st.button("Create Executive Report", use_container_width=True):
+                st.switch_page(reports_page_link)
+
+    else:
+        st.markdown(
+            '<div class="cp-view-note"><strong>Analyst View:</strong> shows the full forecast inputs, demand movement and model information.</div>',
+            unsafe_allow_html=True,
+        )
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            kpi_card("Forecast", f'{result["prediction"]:,.0f} tons', "Model output")
+        with c2:
+            kpi_card("Change", f'{result["change_percent"]:+.1f}%', f'{result["difference"]:+,.0f} tons')
+        with c3:
+            kpi_card("Model", result["model_name"], f"{len(WASTE_FEATURES)} features")
+        with c4:
+            kpi_card("Generated", result["created_at"], "Current session")
+
+        left, right = st.columns([1.1, .9], gap="large")
+        with left:
+            with st.container(border=True):
+                st.markdown("#### Demand movement")
+                waste_chart(result)
+        with right:
+            with st.container(border=True):
+                st.markdown("#### Assessment inputs")
+                st.write(f"**Area:** {result['borough']} · District {result['district']}")
+                st.write(f"**Forecast period:** {result['month_name']} {result['year']}")
+                st.write(f"**Two months ago:** {result['two_months']:,.0f} tons")
+                st.write(f"**Last month:** {result['last_month']:,.0f} tons")
+                st.write(f"**Planning status:** {result['status']}")
+
+    st.markdown("### Test a planning scenario")
+    st.caption("This simulator tests an operational scenario. It does not change the machine-learning forecast.")
+    with st.container(border=True):
+        s1, s2, s3 = st.columns(3)
+        with s1:
+            increase = st.slider("Possible demand increase", 0, 30, 10, format="%d%%")
+        with s2:
+            workforce = st.selectbox("Workforce availability", ["Limited", "Normal", "Strong"], index=1)
+        with s3:
+            vehicle_capacity = st.selectbox("Vehicle capacity", ["Limited", "Current capacity", "Extra capacity"], index=1)
+
+        scenario = scenario_outlook(result, increase, workforce, vehicle_capacity)
+        st.markdown(
+            f"""
+            <div class="cp-scenario-result">
+                <small>Scenario result</small>
+                <h3 style="margin:7px 0;">{html.escape(scenario['status'])}</h3>
+                <p style="color:var(--muted);margin:0;">{html.escape(scenario['detail'])}</p>
+                <div class="cp-module-meta">
+                    <span>Scenario volume: {scenario['volume']:,.0f} tons</span>
+                    <span>{html.escape(scenario['level'])} planning pressure</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     st.caption(
         f'Forecast generated using {result["model_name"]}. '
-        "The result supports planning and requires review with local operational data."
+        "The model result and planning scenario require review with local operational data."
     )
 
 
@@ -1586,29 +2227,57 @@ def advisor_page():
     page_header(
         "✨",
         "AI City Advisor",
-        "Ask about completed city assessments and receive a simple executive explanation or action plan.",
+        "Turn completed city assessments into a clear explanation, priority or short action plan.",
         "AI connected" if has_key else "Smart guidance mode",
         "live",
     )
 
-    q1, q2, q3 = st.columns(3)
-    quick_question = None
+    if not active_results():
+        empty_state(
+            "💬",
+            "Complete an assessment first",
+            "The advisor only uses real results saved in the current CityPulse session. It does not invent city forecasts.",
+        )
+        return
 
-    with q1:
-        if st.button("What is the main city priority?", use_container_width=True):
-            quick_question = "What is the main city priority?"
-    with q2:
-        if st.button("Create a simple action plan", use_container_width=True):
-            quick_question = "Create a simple action plan for the latest result."
-    with q3:
-        if st.button("Explain why this matters", use_container_width=True):
-            quick_question = "Explain why the latest result matters to the city."
+    latest = st.session_state.waste_result
+    if latest:
+        st.markdown(
+            f"""
+            <div class="cp-attention">
+                <div>
+                    <div class="cp-attention-label">LATEST CONTEXT</div>
+                    <h3>{html.escape(latest['borough'])}, District {latest['district']}</h3>
+                    <p>{html.escape(latest['headline'])} · {html.escape(latest['month_name'])} {latest['year']}</p>
+                </div>
+                <div class="cp-attention-status">{html.escape(latest['priority'])}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    if not st.session_state.advisor_messages:
-        with st.chat_message("assistant"):
-            st.write(
-                "Hello. Complete a city assessment, then ask me to explain the result, identify the priority or prepare the next actions."
-            )
+    quick_prompts = [
+        "What is the main city priority?",
+        "Why does the latest result matter?",
+        "Create a short action plan",
+        "Explain this to a city manager",
+    ]
+    selected_prompt = pill_choice(
+        "Quick advisor prompts",
+        quick_prompts,
+        key="advisor_quick_prompt",
+        default=quick_prompts[0],
+    )
+
+    c1, c2 = st.columns([1, 2])
+    with c1:
+        use_prompt = st.button("Use selected question", use_container_width=True)
+    with c2:
+        custom_question = st.text_input(
+            "Ask your own question",
+            placeholder="What should the municipality prepare next?",
+            label_visibility="collapsed",
+        )
 
     for message in st.session_state.advisor_messages:
         with st.chat_message(message["role"]):
@@ -1617,25 +2286,21 @@ def advisor_page():
                 st.caption(message["source"])
 
     user_question = st.chat_input("Ask CityPulse about the city")
-    question = quick_question or user_question
+    question = user_question or (custom_question if custom_question else None) or (selected_prompt if use_prompt else None)
 
     if question:
-        st.session_state.advisor_messages.append(
-            {"role": "user", "content": question, "source": ""}
-        )
+        st.session_state.advisor_messages.append({"role": "user", "content": question, "source": ""})
 
-        with st.spinner("Preparing city guidance..."):
+        with st.status("Reviewing the latest city results...", expanded=False) as status:
             answer, source = ask_city_advisor(question)
+            status.update(label="Guidance ready", state="complete")
 
-        st.session_state.advisor_messages.append(
-            {"role": "assistant", "content": answer, "source": source}
-        )
+        st.session_state.advisor_messages.append({"role": "assistant", "content": answer, "source": source})
         st.rerun()
 
     if not has_key:
         st.info(
-            "The advisor currently uses rule-based guidance from the saved prediction. "
-            "Add OPENAI_API_KEY to Streamlit secrets to enable the live AI advisor."
+            "Smart guidance mode is active. It explains the saved model result using project rules without a paid AI API."
         )
 
 
@@ -1750,7 +2415,7 @@ def profile_page():
     with c2:
         if st.button("Log out", use_container_width=True):
             for key, value in DEFAULT_STATE.items():
-                st.session_state[key] = value
+                st.session_state[key] = deepcopy(value)
             st.rerun()
 
 
