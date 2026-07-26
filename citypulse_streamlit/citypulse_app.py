@@ -1652,68 +1652,172 @@ def waste_workspace():
 # CITY PLAN
 # ---------------------------------------------------------
 def plan_page():
+    open_tasks = [task for task in st.session_state.city_plan if not task["done"]]
+    completed_tasks = [task for task in st.session_state.city_plan if task["done"]]
+    total_tasks = len(st.session_state.city_plan)
+
     page_header(
         "✓",
-        "Your City Plan",
-        "Keep only the next useful actions. Missions and complex project structures can be added later when needed.",
-        chip=f'{len([task for task in st.session_state.city_plan if not task["done"]])} open',
-        chip_class="amber",
+        "City Action Plan",
+        "A clear list of the next decisions created from your city setup, assessments, and model results.",
+        chip=f"{len(open_tasks)} open",
+        chip_class="amber" if open_tasks else "green",
     )
 
     if not st.session_state.city_plan:
         st.markdown(
             """
             <div class="cp-empty">
-                <div style="font-size:42px;">📝</div>
-                <h3>No city actions yet</h3>
-                <p>Run the first City Check or complete the Waste Planning assessment.</p>
+                <div style="font-size:42px;">🧭</div>
+                <h3>Your first city action will appear here</h3>
+                <p>Activate one city system or run the first City Check. CityPulse will then turn the result into a short action plan.</p>
             </div>
             """,
             unsafe_allow_html=True,
         )
+
+        col1, col2 = st.columns(2)
+        if col1.button("Activate a City System", type="primary", use_container_width=True):
+            st.switch_page(systems_page_link)
+        if col2.button("Ask CityPulse What to Start With", use_container_width=True):
+            advisor_dialog("plan")
         return
 
-    phases = ["Now", "Next", "Later"]
+    completed_percent = int((len(completed_tasks) / total_tasks) * 100) if total_tasks else 0
+    current_action = open_tasks[0] if open_tasks else None
 
-    for phase in phases:
-        tasks = [task for task in st.session_state.city_plan if task["phase"] == phase]
+    if current_action:
+        if current_action["title"] == "Activate the first city system":
+            headline = "Start with the city area where information is already available."
+            explanation = (
+                "Activating one system lets CityPulse create the first useful assessment "
+                "and replace this setup task with a real city decision."
+            )
+        else:
+            headline = current_action["title"]
+            explanation = current_action["detail"]
 
+        st.markdown(
+            f"""
+            <div class="cp-decision">
+                <small>Recommended next move · {html.escape(current_action['phase'])}</small>
+                <h2>{html.escape(headline)}</h2>
+                <p>{html.escape(explanation)}</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        action_col1, action_col2, action_col3 = st.columns([1.1, 1, 1])
+
+        if current_action["title"] == "Activate the first city system":
+            if action_col1.button("Choose a City System", type="primary", use_container_width=True):
+                st.switch_page(systems_page_link)
+        else:
+            if action_col1.button("Mark Next Move Complete", type="primary", use_container_width=True):
+                current_action["done"] = True
+                st.toast("Action completed", icon="✅")
+                st.rerun()
+
+        if action_col2.button("Ask CityPulse About This", use_container_width=True):
+            advisor_dialog("plan")
+
+        if action_col3.button("Create Executive Report", use_container_width=True):
+            st.switch_page(report_page_link)
+
+    else:
+        st.markdown(
+            """
+            <div class="cp-decision">
+                <small>Current plan status</small>
+                <h2>All current actions are complete.</h2>
+                <p>Run another City Check or complete a new system assessment to create the next set of city actions.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        if st.button("Return to Command Center", type="primary", use_container_width=True):
+            st.switch_page(home_page_link)
+
+    st.write("")
+    st.subheader("Plan Progress")
+    progress_col1, progress_col2, progress_col3 = st.columns(3)
+
+    with progress_col1:
+        kpi_card("Open Actions", str(len(open_tasks)), "Still waiting for a city decision")
+    with progress_col2:
+        kpi_card("Completed", str(len(completed_tasks)), "Reviewed during this session")
+    with progress_col3:
+        kpi_card("Progress", f"{completed_percent}%", "Based on the current action list")
+
+    st.progress(completed_percent / 100 if total_tasks else 0)
+
+    st.write("")
+    st.subheader("Action Timeline")
+    view = st.radio(
+        "Plan view",
+        ["Open", "Completed", "All"],
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+
+    if view == "Open":
+        visible_tasks = open_tasks
+    elif view == "Completed":
+        visible_tasks = completed_tasks
+    else:
+        visible_tasks = st.session_state.city_plan
+
+    if not visible_tasks:
+        st.info(f"No {view.lower()} actions in the current plan.")
+        return
+
+    phase_info = {
+        "Now": ("Do now", "amber"),
+        "Next": ("Prepare next", "blue"),
+        "Later": ("Keep for later", "gray"),
+    }
+
+    for phase in ["Now", "Next", "Later"]:
+        tasks = [task for task in visible_tasks if task["phase"] == phase]
         if not tasks:
             continue
 
-        st.subheader(phase)
+        phase_label, phase_class = phase_info[phase]
+        st.markdown(f"### {phase}")
 
         for task in tasks:
             with st.container(border=True):
-                col1, col2 = st.columns([.78, .22])
-                col1.markdown(f"**{task['title']}**")
-                col1.caption(task["detail"])
+                text_col, action_col = st.columns([0.78, 0.22], vertical_alignment="center")
 
-                done = col2.checkbox(
-                    "Done",
-                    value=task["done"],
-                    key=f'done_{task["id"]}',
-                )
-
-                if done != task["done"]:
-                    task["done"] = done
-                    st.rerun()
-
-                with st.expander("Add a note"):
-                    task["note"] = st.text_input(
-                        "Note",
-                        value=task.get("note", ""),
-                        key=f'note_{task["id"]}',
-                        label_visibility="collapsed",
+                with text_col:
+                    st.markdown(
+                        f'<span class="cp-chip {phase_class}">{phase_label}</span>',
+                        unsafe_allow_html=True,
                     )
+                    st.markdown(f"#### {task['title']}")
+                    st.caption(f"Why it matters: {task['detail']}")
+
+                with action_col:
+                    if task["done"]:
+                        st.success("Completed")
+                        if st.button("Reopen", use_container_width=True, key=f"reopen_{task['id']}"):
+                            task["done"] = False
+                            st.rerun()
+                    else:
+                        if st.button("Mark Complete", use_container_width=True, key=f"complete_{task['id']}"):
+                            task["done"] = True
+                            st.toast("Action completed", icon="✅")
+                            st.rerun()
 
     st.write("")
-    col1, col2 = st.columns(2)
+    bottom_col1, bottom_col2 = st.columns(2)
 
-    if col1.button("✨ Ask CityPulse About the Plan", use_container_width=True):
+    if bottom_col1.button("✨ Ask CityPulse About the Plan", use_container_width=True):
         advisor_dialog("plan")
 
-    if col2.button("📄 Create Executive Report", use_container_width=True):
+    if bottom_col2.button("📄 Create Executive Report", use_container_width=True):
         st.switch_page(report_page_link)
 
 
