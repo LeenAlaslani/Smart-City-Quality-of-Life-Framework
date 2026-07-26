@@ -14,7 +14,6 @@
 </p>
 
 ---
-![Uploading CityPulse AI.png…]()
 
 ## Project Overview
 
