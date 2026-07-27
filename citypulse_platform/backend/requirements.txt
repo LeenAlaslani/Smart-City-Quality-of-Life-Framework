@@ -1,0 +1,13 @@
+# CityPulse AI — inference backend (runs the 4 real project models).
+# Versions pinned to the set verified to load the trained bundles correctly.
+fastapi==0.128.8
+uvicorn[standard]==0.39.0
+pydantic==2.13.4
+scikit-learn==1.6.1
+lightgbm==4.6.0
+pandas==2.3.3
+numpy==2.0.2
+joblib==1.5.3
+# LightGBM (transportation model) needs the OpenMP runtime at run time:
+#   Docker/Linux -> apt-get install libgomp1  (handled by the Dockerfile)
+#   macOS local  -> brew install libomp

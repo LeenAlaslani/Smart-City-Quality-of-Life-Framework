@@ -1,0 +1,61 @@
+/* CityPulse AI — design tokens.
+   Original CityPulse identity following Saudi Platforms Code principles:
+   light/institutional surface, restrained palette, structured spacing, ≥4.5:1
+   contrast, IBM Plex typography, RTL-ready. */
+:root {
+  /* Brand — navy primary (from the CityPulse logo), teal used sparingly */
+  --cp-navy-900: #0c223f;
+  --cp-navy-800: #102a4d;
+  --cp-navy-700: #163a68;
+  --cp-navy-600: #1d4a82;   /* primary */
+  --cp-navy-500: #2a5c9a;
+  --cp-teal-600: #0f7d92;   /* accent */
+  --cp-teal-500: #159bb3;
+  --cp-teal-050: #e7f4f7;
+
+  /* Neutrals — premium, cool off-white surfaces */
+  --cp-bg: #f6f8fb;
+  --cp-surface: #ffffff;
+  --cp-surface-2: #f7fafd;
+  --cp-border: #e8edf4;
+  --cp-border-strong: #d4dce6;
+  --cp-ink: #16233b;         /* headings/body */
+  --cp-ink-2: #43536b;       /* secondary */
+  --cp-muted: #6b7a90;       /* muted labels */
+
+  /* Status — softened, controlled, cool-leaning (never harsh) */
+  --cp-stable: #2f9e7b;   --cp-stable-bg: #e9f5f0;
+  --cp-watch: #5a86ad;    --cp-watch-bg: #eef3f9;
+  --cp-elevated: #b98f3f; --cp-elevated-bg: #f7f1e4;
+  --cp-high: #bd7761;     --cp-high-bg: #f6ece7;
+  --cp-critical: #b15f6b; --cp-critical-bg: #f5eaed;
+  --cp-info: #1d4a82;     --cp-info-bg: #eaf1f9;
+
+  /* Brand gradients for premium surfaces */
+  --grad-brand: linear-gradient(135deg, #1d4a82 0%, #1c6e8c 55%, #159bb3 100%);
+  --grad-soft: linear-gradient(180deg, #ffffff 0%, #f5f9fd 100%);
+  --glow-teal: radial-gradient(closest-side, rgba(21,155,179,.22), transparent);
+  --glow-navy: radial-gradient(closest-side, rgba(29,74,130,.18), transparent);
+
+  /* Spacing scale (4-based) */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-12: 48px;
+
+  /* Radius — restrained, not mobile-bubbly */
+  --r-sm: 6px; --r-md: 8px; --r-lg: 12px;
+
+  /* Elevation — soft, used sparingly */
+  --sh-1: 0 1px 2px rgba(16, 42, 77, 0.06), 0 1px 1px rgba(16, 42, 77, 0.04);
+  --sh-2: 0 2px 8px rgba(16, 42, 77, 0.07);
+  --sh-3: 0 8px 24px rgba(16, 42, 77, 0.10);
+
+  /* Typography */
+  --font: "IBM Plex Sans", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px;
+  --fs-16: 16px; --fs-18: 18px; --fs-20: 20px; --fs-24: 24px; --fs-30: 30px; --fs-38: 38px;
+
+  /* Layout */
+  --content-max: 1240px;
+  --sidebar-w: 248px;
+  --header-h: 62px;
+}

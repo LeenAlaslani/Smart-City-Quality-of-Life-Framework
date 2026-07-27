@@ -1,0 +1,38 @@
+# CityPulse AI — Render Blueprint (two services).
+# Place this file at the REPOSITORY ROOT to use "New + > Blueprint", or create
+# the two services manually with the settings below. Paths are repo-root relative.
+services:
+  # ---- Python inference backend (FastAPI + the 4 real joblib models) ----
+  - type: web
+    name: citypulse-backend
+    runtime: docker
+    plan: free
+    rootDir: citypulse_platform/backend
+    dockerfilePath: citypulse_platform/backend/Dockerfile
+    dockerContext: citypulse_platform/backend
+    healthCheckPath: /api/health
+    autoDeploy: false
+    envVars:
+      # Optional: lock CORS to the frontend origin in production.
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+  # ---- React frontend (static site) ----
+  - type: web
+    name: citypulse-frontend
+    runtime: static
+    plan: free
+    rootDir: citypulse_platform/frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    autoDeploy: false
+    envVars:
+      # REQUIRED: set to the backend service URL + /api after the backend deploys,
+      # e.g. https://citypulse-backend.onrender.com/api
+      - key: VITE_API_BASE
+        sync: false
+    routes:
+      # SPA history-mode fallback so deep links (/app/*) serve index.html.
+      - type: rewrite
+        source: /*
+        destination: /index.html
