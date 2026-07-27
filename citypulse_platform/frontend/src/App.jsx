@@ -1,22 +1,18 @@
-// CityPulse AI — routes. Page purposes: Overview (executive brief) ·
-// Intelligence (signals & evidence) · Studio (compare options) · Blueprint
-// (city strategy) · Actions (operational follow-up) · Roadmap (delivery) ·
-// Reports (executive summary) · Evidence (models & validation) · Profile
-// (city context). The agent is a persistent dock in the shell, not a page.
+// CityPulse AI — routes. Five daily pages + two utility pages; the agent lives
+// inside the Decision Workspace, not a page. Old routes redirect to their new
+// homes so nothing 404s.
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useProfile } from './lib/store'
 import AppShell from './components/AppShell'
 import Onboarding from './pages/Onboarding'
 import LandingV2 from './pages/LandingV2'
 import Overview from './pages/Overview'
-import Intelligence from './pages/Intelligence'
-import Studio from './pages/Studio'
-import Blueprint from './pages/Blueprint'
-import CityProfile from './pages/CityProfile'
-import Roadmap from './pages/Roadmap'
-import ActionCenter from './pages/ActionCenter'
-import Evidence from './pages/Evidence'
+import Signals from './pages/Signals'
+import Workspace from './pages/Workspace'
+import Initiatives from './pages/Initiatives'
 import Reports from './pages/Reports'
+import Evidence from './pages/Evidence'
+import CityProfile from './pages/CityProfile'
 
 function Guarded({ children }) {
   const { isOnboarded } = useProfile()
@@ -29,17 +25,24 @@ export default function App() {
     <Routes>
       <Route path="/" element={<LandingV2 />} />
       <Route path="/onboarding" element={<Onboarding />} />
+
       <Route path="/app/overview" element={<Guarded><Overview /></Guarded>} />
-      <Route path="/app/intelligence" element={<Guarded><Intelligence /></Guarded>} />
-      <Route path="/app/studio" element={<Guarded><Studio /></Guarded>} />
-      <Route path="/app/scenarios" element={<Navigate to="/app/studio" replace />} />
-      <Route path="/app/blueprint" element={<Guarded><Blueprint /></Guarded>} />
-      <Route path="/app/profile" element={<Guarded><CityProfile /></Guarded>} />
-      <Route path="/app/roadmap" element={<Guarded><Roadmap /></Guarded>} />
-      <Route path="/app/actions" element={<Guarded><ActionCenter /></Guarded>} />
-      <Route path="/app/copilot" element={<Navigate to="/app/overview" replace />} />
+      <Route path="/app/signals" element={<Guarded><Signals /></Guarded>} />
+      <Route path="/app/workspace" element={<Guarded><Workspace /></Guarded>} />
+      <Route path="/app/initiatives" element={<Guarded><Initiatives /></Guarded>} />
       <Route path="/app/reports" element={<Guarded><Reports /></Guarded>} />
+      <Route path="/app/profile" element={<Guarded><CityProfile /></Guarded>} />
       <Route path="/app/evidence" element={<Guarded><Evidence /></Guarded>} />
+
+      {/* legacy routes → new homes */}
+      <Route path="/app/intelligence" element={<Navigate to="/app/signals" replace />} />
+      <Route path="/app/studio" element={<Navigate to="/app/workspace" replace />} />
+      <Route path="/app/scenarios" element={<Navigate to="/app/workspace" replace />} />
+      <Route path="/app/blueprint" element={<Navigate to="/app/initiatives" replace />} />
+      <Route path="/app/actions" element={<Navigate to="/app/initiatives" replace />} />
+      <Route path="/app/roadmap" element={<Navigate to="/app/initiatives" replace />} />
+      <Route path="/app/copilot" element={<Navigate to="/app/workspace" replace />} />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

@@ -1,6 +1,6 @@
 // CityPulse AI — Reports: a concise, printable executive summary composed from
-// the live model reading and the real workspace (actions, roadmap, scenarios).
-// Concrete outcomes with units; provenance honesty in one clear closing note.
+// the live model reading and the real workspace (initiatives + operational
+// tasks). Concrete outcomes with units; one honest provenance line.
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { useProfile } from '../lib/store'
@@ -23,8 +23,10 @@ export default function Reports() {
   const s = r.reading.signals
   const focus = s[r.impact.focus_domain]
   const ordered = Object.values(s).sort((a, b) => b.pressure - a.pressure)
-  const toReview = ws.actions.filter((a) => a.status === 'To review')
-  const inProg = ws.actions.filter((a) => a.status === 'In progress' || a.status === 'Approved')
+  const inits = ws.initiatives || []
+  const inReview = inits.filter((i) => i.status === 'In review')
+  const inDelivery = inits.filter((i) => i.status === 'In delivery')
+  const openTasks = (ws.tasks || []).filter((t) => t.status !== 'Done')
 
   return (
     <>
@@ -62,21 +64,15 @@ export default function Reports() {
           </div>
         </Section>
 
-        <Section n="3" title="Decisions & delivery">
-          {toReview.length ? <><b>{toReview.length}</b> decision{toReview.length === 1 ? '' : 's'} awaiting review — first: {toReview[0].title}. </> : 'No decisions awaiting review. '}
-          {inProg.length ? <><b>{inProg.length}</b> action{inProg.length === 1 ? '' : 's'} in delivery.</> : 'No actions currently in delivery.'}
+        <Section n="3" title="Initiatives & delivery">
+          <b>{inits.length}</b> initiative{inits.length === 1 ? '' : 's'} in the pipeline
+          {inReview.length ? <> · <b>{inReview.length}</b> awaiting review (first: {inReview[0].title})</> : null}
+          {inDelivery.length ? <> · <b>{inDelivery.length}</b> in delivery</> : null}.
+          {inits.length ? <ul className="rul">{inits.slice(0, 5).map((i) => <li key={i.id}><b>{i.title}</b> — {i.status} · owner {i.owner}</li>)}</ul> : ' No initiatives yet.'}
         </Section>
 
-        <Section n="4" title="Roadmap">
-          {ws.roadmap.length
-            ? <ul className="rul">{ws.roadmap.slice(0, 5).map((i) => <li key={i.id}><b>{i.title}</b> — {i.objective} <span className="muted">({i.horizon}-term · {i.status} · {i.department})</span></li>)}</ul>
-            : <span className="muted">No initiatives yet.</span>}
-        </Section>
-
-        <Section n="5" title="Saved decision studies">
-          {ws.scenarios.length
-            ? <ul className="rul">{ws.scenarios.slice(0, 4).map((x) => <li key={x.id}><b>{x.title}</b> — focus {x.focus}</li>)}</ul>
-            : <span className="muted">No saved studies yet.</span>}
+        <Section n="4" title="Operational tasks">
+          {openTasks.length ? <ul className="rul">{openTasks.slice(0, 5).map((t) => <li key={t.id}><b>{t.title}</b> <span className="muted">({t.status} · {t.department})</span></li>)}</ul> : <span className="muted">No open tasks.</span>}
         </Section>
 
         <div className="report-note"><Icon name="info" size={14} /> {PROTOTYPE_NOTE}</div>
@@ -91,7 +87,7 @@ export default function Reports() {
         .ro-v{margin-inline-start:auto;color:var(--cp-ink);font-weight:700}
         .ro-st{font-size:11px;font-weight:800;text-transform:uppercase}
         .report-note{display:flex;align-items:center;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--cp-border);font-size:12px;color:var(--cp-muted)}
-        @media print { .rail,.cbar,.pagehead .btn,.btn{display:none !important} .stagex{padding:0 !important} }
+        @media print { .rail,.cbar,.pg .btn,.btn{display:none !important} .stagex{padding:0 !important} }
         @media (max-width:760px){ .rep-outs{grid-template-columns:1fr} }
       `}</style>
     </>
@@ -108,5 +104,5 @@ const Section = ({ n, title, children }) => (
   </div>
 )
 const Head = () => (
-  <div className="pagehead"><div className="eyebrow">Reports</div><h1>Executive city summary</h1></div>
+  <div className="pg"><div><div className="pg-eyebrow">Reports</div><h1>Executive city summary</h1></div></div>
 )

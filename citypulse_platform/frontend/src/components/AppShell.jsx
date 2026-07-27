@@ -1,30 +1,24 @@
-// CityPulse AI — application frame: navy icon rail + light command bar + a
-// persistent contextual Agent dock (right side, never competing with content).
-// Pages stay light; navy is chrome and focus only. ⌘K opens the palette.
+// CityPulse AI — application frame: a compact navy icon rail + a light command
+// bar over a clean light stage. Five daily pages (Overview · Signals · Decision
+// Workspace · Initiatives · Reports) and two utility pages (City Profile ·
+// Evidence). The agent lives inside the Decision Workspace, not a side drawer.
+// Pages stay light; navy is chrome only. ⌘K opens the command palette.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { api } from '../lib/api'
 import { useProfile } from '../lib/store'
 import { useWorkspace } from '../lib/workspace'
 import { cityName } from '../lib/cityContext'
-import { agentRespond, quickPrompts } from '../lib/agent'
 import Icon from './icons'
 
 const NAV = [
-  { to: '/app/overview', label: 'Overview', hint: 'Executive briefing', ico: 'overview', group: 0 },
-  { to: '/app/intelligence', label: 'Intelligence', hint: 'Signals & evidence', ico: 'intelligence', group: 0 },
-  { to: '/app/studio', label: 'Decision Studio', hint: 'Compare options', ico: 'scenarios', group: 0 },
-  { to: '/app/blueprint', label: 'Blueprint', hint: 'City strategy', ico: 'target', group: 0 },
-  { to: '/app/actions', label: 'Action Center', hint: 'Operational follow-up', ico: 'actions', group: 1, badge: true },
-  { to: '/app/roadmap', label: 'Roadmap', hint: 'Delivery phases', ico: 'roadmap', group: 1 },
-  { to: '/app/reports', label: 'Reports', hint: 'Executive summary', ico: 'reports', group: 2 },
-  { to: '/app/evidence', label: 'Evidence', hint: 'Models & validation', ico: 'layers', group: 2 },
+  { to: '/app/overview', label: 'Overview', hint: 'City operations', ico: 'overview', group: 0 },
+  { to: '/app/signals', label: 'Signals', hint: 'Model readings & evidence', ico: 'pulse', group: 0 },
+  { to: '/app/workspace', label: 'Decision Workspace', hint: 'Investigate & recommend', ico: 'scenarios', group: 0 },
+  { to: '/app/initiatives', label: 'Initiatives', hint: 'Approvals & delivery', ico: 'target', group: 0, badge: true },
+  { to: '/app/reports', label: 'Reports', hint: 'Executive summary', ico: 'reports', group: 0 },
+  { to: '/app/profile', label: 'City Profile', hint: 'Context & data', ico: 'pin', group: 1 },
+  { to: '/app/evidence', label: 'Evidence', hint: 'Models & validation', ico: 'layers', group: 1 },
 ]
-const ROUTE_NAME = {
-  '/app/overview': 'Overview', '/app/intelligence': 'Intelligence', '/app/studio': 'Decision Studio',
-  '/app/scenarios': 'Decision Studio', '/app/blueprint': 'Blueprint', '/app/actions': 'Action Center',
-  '/app/roadmap': 'Roadmap', '/app/reports': 'Reports', '/app/evidence': 'Evidence', '/app/profile': 'City Profile',
-}
 
 export default function AppShell({ children }) {
   const nav = useNavigate()
@@ -32,14 +26,14 @@ export default function AppShell({ children }) {
   const { profile } = useProfile()
   const ws = useWorkspace()
   const [palette, setPalette] = useState(false)
-  const [dock, setDock] = useState(false)
-  const openActions = ws.actions.filter((a) => a.status !== 'Done').length
+  // review + delivery items needing a human — the one rail badge
+  const pending = (ws.initiatives || []).filter((i) => i.status === 'In review' || i.status === 'Proposed').length
   const city = profile.city ? cityName(profile) : 'Select city'
 
   useEffect(() => {
     const onKey = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setPalette((p) => !p) }
-      if (e.key === 'Escape') { setPalette(false); setDock(false) }
+      if (e.key === 'Escape') setPalette(false)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -52,13 +46,13 @@ export default function AppShell({ children }) {
           <PulseGlyph />
         </button>
         <nav className="rail-nav">
-          {[0, 1, 2].map((g) => (
+          {[0, 1].map((g) => (
             <div className="rail-grp" key={g}>
               {NAV.filter((n) => n.group === g).map((n) => (
                 <NavLink key={n.to} to={n.to} className={({ isActive }) => `rail-i${isActive ? ' on' : ''}`}>
                   <Icon name={n.ico} size={20} />
                   <span className="flyout"><b>{n.label}</b><em>{n.hint}</em></span>
-                  {n.badge && openActions > 0 && <span className="rail-badge">{openActions}</span>}
+                  {n.badge && pending > 0 && <span className="rail-badge">{pending}</span>}
                 </NavLink>
               ))}
             </div>
@@ -85,10 +79,7 @@ export default function AppShell({ children }) {
               <span>Search or run a command</span>
               <kbd>⌘K</kbd>
             </button>
-            <button className={`cbar-agent${dock ? ' on' : ''}`} onClick={() => setDock((d) => !d)} title="CityPulse agent">
-              <Icon name="spark" size={16} /> Agent
-            </button>
-            <button className="btn btn-cyan cbar-new" onClick={() => nav('/app/intelligence?guided=1')}>
+            <button className="btn btn-cyan cbar-new" onClick={() => nav('/app/workspace')}>
               <Icon name="plus" size={16} /> New decision
             </button>
           </div>
@@ -98,73 +89,8 @@ export default function AppShell({ children }) {
         </main>
       </div>
 
-      {dock && <AgentDock onClose={() => setDock(false)} route={ROUTE_NAME[loc.pathname] || 'Platform'} pathname={loc.pathname} />}
       {palette && <CommandPalette onClose={() => setPalette(false)} onGo={(to) => { setPalette(false); nav(to) }} current={loc.pathname} />}
     </div>
-  )
-}
-
-// ── Persistent contextual agent dock ───────────────────────────────────────
-function AgentDock({ onClose, route, pathname }) {
-  const nav = useNavigate()
-  const { profile } = useProfile()
-  const ws = useWorkspace()
-  const [analyze, setAnalyze] = useState(null)
-  const [msgs, setMsgs] = useState([])
-  const [input, setInput] = useState('')
-  const endRef = useRef(null)
-  useEffect(() => { api.analyze(profile, 'baseline').then(setAnalyze).catch(() => {}) }, [])
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
-
-  const send = (text) => {
-    if (!text.trim()) return
-    const reply = agentRespond(text, { profile, analyze, ws, nav, route })
-    setMsgs((m) => [...m, { role: 'user', text }, { role: 'ai', ...reply }])
-    setInput('')
-  }
-  const prompts = quickPrompts(pathname)
-  const focus = analyze?.impact?.focus_label
-
-  return (
-    <aside className="dock" role="complementary" aria-label="CityPulse agent">
-      <div className="dock-head">
-        <span className="dock-mark"><Icon name="spark" size={15} /></span>
-        <div className="dock-t"><b>CityPulse agent</b><em>{cityName(profile)} · {route}</em></div>
-        <button className="dock-x" onClick={onClose} aria-label="Close agent"><Icon name="plus" size={16} style={{ transform: 'rotate(45deg)' }} /></button>
-      </div>
-      <div className="dock-ctx">
-        <span><Icon name="target" size={12} /> {focus ? focus.split(' & ')[0] : '—'} priority</span>
-        <span><Icon name="actions" size={12} /> {ws.actions.filter((a) => a.status !== 'Done').length} open</span>
-        <span><Icon name="layers" size={12} /> {ws.blueprint.length} blueprint</span>
-      </div>
-      <div className="dock-msgs">
-        {msgs.length === 0 && (
-          <div className="dock-hello">
-            Grounded in {cityName(profile)}'s live model readings, profile and workspace.
-            Ask a question or pick a prompt.
-            <span className="dock-honest">Rule-based prototype assistant — answers are labelled by source.</span>
-          </div>
-        )}
-        {msgs.map((m, i) => (
-          <div key={i} className={`dmsg ${m.role}`}>
-            <div className="dbub">
-              {m.tag && <span className="dsrc">{m.tag}</span>}
-              <div>{m.text}</div>
-              {m.actions && <div className="dacts">{m.actions.map((a, j) => (
-                <button key={j} onClick={() => { a.fn(); }} className="dact"><Icon name={a.icon} size={13} />{a.label}</button>
-              ))}</div>}
-            </div>
-          </div>
-        ))}
-        <div ref={endRef} />
-      </div>
-      <div className="dock-sug">{prompts.slice(0, 3).map((p) => <button key={p} onClick={() => send(p)}>{p}</button>)}</div>
-      <div className="dock-in">
-        <input value={input} placeholder="Ask about the city…" onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && send(input)} aria-label="Ask the agent" />
-        <button onClick={() => send(input)} aria-label="Send"><Icon name="arrowRight" size={16} /></button>
-      </div>
-    </aside>
   )
 }
 
@@ -189,9 +115,8 @@ function CommandPalette({ onClose, onGo, current }) {
   useEffect(() => { inputRef.current?.focus() }, [])
   const items = useMemo(() => {
     const base = [
-      { to: '/app/intelligence?guided=1', label: 'New decision', hint: 'Guided flow', ico: 'plus' },
+      { to: '/app/workspace', label: 'New decision', hint: 'Investigate', ico: 'plus' },
       ...NAV.map((n) => ({ to: n.to, label: n.label, hint: n.hint, ico: n.ico })),
-      { to: '/app/profile', label: 'City Profile', hint: 'Context & data', ico: 'pin' },
       { to: '/', label: 'CityPulse home', hint: 'Landing', ico: 'home' },
     ]
     const s = q.trim().toLowerCase()

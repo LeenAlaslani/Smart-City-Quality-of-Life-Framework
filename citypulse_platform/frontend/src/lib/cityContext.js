@@ -19,6 +19,18 @@ const HIDE = {
   riyadh_season: (p) => p.city !== 'riyadh',            // Riyadh-only event
   metro_line: (p) => p.population_range === 'lt_250k',  // no metro case in small towns
 }
+// Clear operational government language for every decision (overrides the
+// backend's shorter titles). City-specific overrides layer on top.
+export const DECISION_OP_LABEL = {
+  metro_line: 'Open a new metro line',
+  riyadh_season: 'Prepare city services for a major event season',
+  prioritise_district: 'Prioritise a high-demand district',
+  visitor_surge: 'Plan for a visitor / pilgrimage surge',
+  waste_capacity: 'Increase waste-collection capacity',
+  energy_demand: 'Add capacity for higher energy demand',
+  staffing: 'Increase service-desk staffing for peak hours',
+  new_development: 'Plan a new development phase',
+}
 const RELABEL = {
   visitor_surge: (p) => (p.city === 'makkah' || p.city === 'madinah')
     ? { title: 'Prepare for pilgrimage season', category: 'Pilgrimage' } : null,
@@ -33,8 +45,9 @@ export function cityDecisions(profile, decisions) {
     .filter((d) => d.id !== 'baseline')
     .filter((d) => !(HIDE[d.id] && HIDE[d.id](profile)))
     .map((d) => {
+      const op = DECISION_OP_LABEL[d.id] ? { title: DECISION_OP_LABEL[d.id] } : null
       const patch = RELABEL[d.id] && RELABEL[d.id](profile)
-      return patch ? { ...d, ...patch } : d
+      return { ...d, ...op, ...patch }
     })
 }
 
