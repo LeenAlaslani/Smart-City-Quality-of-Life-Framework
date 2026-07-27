@@ -21,7 +21,6 @@ services:
   - type: web
     name: citypulse-frontend
     runtime: static
-    plan: free
     rootDir: citypulse_platform/frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
