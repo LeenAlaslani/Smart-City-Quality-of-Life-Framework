@@ -6,7 +6,6 @@ services:
     name: citypulse-backend
     runtime: docker
     plan: free
-    rootDir: citypulse_platform/backend
     dockerfilePath: citypulse_platform/backend/Dockerfile
     dockerContext: citypulse_platform/backend
     healthCheckPath: /api/health
