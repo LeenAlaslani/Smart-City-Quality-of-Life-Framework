@@ -8,8 +8,8 @@ services:
     runtime: docker
     plan: free
     rootDir: citypulse_platform/backend
-    dockerfilePath: citypulse_platform/backend/Dockerfile
-    dockerContext: citypulse_platform/backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /api/health
     autoDeploy: false
     envVars:
@@ -21,7 +21,6 @@ services:
   - type: web
     name: citypulse-frontend
     runtime: static
-    plan: free
     rootDir: citypulse_platform/frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
