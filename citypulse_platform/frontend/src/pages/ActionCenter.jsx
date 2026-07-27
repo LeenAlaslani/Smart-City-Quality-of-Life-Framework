@@ -1,31 +1,43 @@
-// CityPulse AI — Action Center. Track real decisions & tasks created across the
-// platform. Editable status / owner / priority / due date. Jira-like clarity.
+// CityPulse AI — Action Center: operational decisions & tasks with owner,
+// priority, status and deadline — all real workspace records, editable inline.
+// The agent triages what needs review first from the same data.
 import { useState } from 'react'
+import { useProfile } from '../lib/store'
 import { useWorkspace, STATUSES, PRIORITIES, DEPARTMENTS } from '../lib/workspace'
-import { Card, Button, EmptyState, StatusChip } from '../components/ui'
+import { cityName } from '../lib/cityContext'
+import { Card, Button, EmptyState } from '../components/ui'
+import { AgentBrief } from '../components/Agent'
 import Icon, { DOMAIN_ICON } from '../components/icons'
 
-const STATUS_TONE = { 'To review': 'info', Approved: 'stable', 'In progress': 'elevated', Done: 'neutral' }
-const PRIO_TONE = { High: 'high', Medium: 'elevated', Low: 'neutral' }
-
 export default function ActionCenter() {
+  const { profile } = useProfile()
   const ws = useWorkspace()
   const [filter, setFilter] = useState('All')
   const [adding, setAdding] = useState(false)
 
   const filtered = filter === 'All' ? ws.actions : ws.actions.filter((a) => a.status === filter)
   const counts = STATUSES.reduce((m, s) => ({ ...m, [s]: ws.actions.filter((a) => a.status === s).length }), {})
+  const toReview = ws.actions.filter((a) => a.status === 'To review')
+    .sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999'))
 
   return (
     <>
-      <div className="pagehead between">
+      <div className="pg">
         <div>
-          <div className="eyebrow">Action Center</div>
+          <div className="pg-eyebrow">Action Center · {cityName(profile)}</div>
           <h1>Decisions &amp; tasks</h1>
-          <p className="lead">Track and move real work created across the platform.</p>
+          <p className="pg-purpose">Operational work with owner, priority, status and deadline — editable in place.</p>
         </div>
-        <Button icon="plus" onClick={() => setAdding(true)}>New action</Button>
+        <div className="pg-r"><Button icon="plus" onClick={() => setAdding(true)}>New action</Button></div>
       </div>
+
+      {toReview.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <AgentBrief compact
+            lines={[{ v: `${toReview.length} item${toReview.length === 1 ? '' : 's'} awaiting review. First: “${toReview[0].title}” (${toReview[0].department}${toReview[0].due ? ` · due ${toReview[0].due}` : ''}). Approve it or move it into delivery.` }]}
+            actions={[{ label: 'Show items to review', icon: 'clock', fn: () => setFilter('To review') }]} />
+        </div>
+      )}
 
       <div className="row" style={{ gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         {['All', ...STATUSES].map((s) => (
@@ -74,7 +86,7 @@ export default function ActionCenter() {
                       </select>
                     </td>
                     <td><input type="date" className="mini" value={a.due || ''} onChange={(e) => ws.updateAction(a.id, { due: e.target.value })} /></td>
-                    <td><button className="linkbtn" onClick={() => ws.removeAction(a.id)} title="Remove"><Icon name="alert" size={15} /></button></td>
+                    <td><button className="linkbtn" onClick={() => ws.removeAction(a.id)} title="Remove"><Icon name="waste" size={15} /></button></td>
                   </tr>
                 ))}
               </tbody>

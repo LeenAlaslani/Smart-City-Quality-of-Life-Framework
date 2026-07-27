@@ -2,6 +2,26 @@
 // tooltip, table, alert, states, tabs, model-result + action components).
 import Icon from './icons'
 
+// Shared page header — eyebrow · title · single purpose line · right actions.
+export const PageHead = ({ eyebrow, title, purpose, children }) => (
+  <div className="pg">
+    <div>
+      {eyebrow && <div className="pg-eyebrow">{eyebrow}</div>}
+      <h1>{title}</h1>
+      {purpose && <p className="pg-purpose">{purpose}</p>}
+    </div>
+    {children && <div className="pg-r">{children}</div>}
+  </div>
+)
+
+// Small-caps section label with optional trailing link/action.
+export const Sect = ({ label, action, onAction, children }) => (
+  <div className="sect">
+    <span>{label}</span>
+    {action && <button className="sect-link" onClick={onAction}>{action}{children}</button>}
+  </div>
+)
+
 export const Button = ({ variant = 'primary', size, icon, iconRight, block, className = '', children, ...p }) => (
   <button className={`btn btn-${variant}${size ? ' btn-' + size : ''}${block ? ' btn-block' : ''} ${className}`} {...p}>
     {icon && <Icon name={icon} size={size === 'lg' ? 18 : 16} />}

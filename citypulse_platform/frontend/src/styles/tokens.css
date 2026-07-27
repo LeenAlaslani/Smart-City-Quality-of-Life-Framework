@@ -12,6 +12,15 @@
   --cp-teal-600: #0f7d92;   /* accent */
   --cp-teal-500: #159bb3;
   --cp-teal-050: #e7f4f7;
+  --cp-cyan: #3fd0e6;        /* controlled cyan highlight */
+  --cp-cyan-soft: #7fdbe8;
+
+  /* Elevated navy panels (premium surfaces on light pages) */
+  --cp-panel: #0e2a4f;       /* deep navy panel bg */
+  --cp-panel-2: #12305c;
+  --cp-on-panel: #eaf1fb;    /* text on navy */
+  --cp-on-panel-2: #a9c0dd;  /* secondary text on navy */
+  --cp-panel-border: rgba(120,170,210,.16);
 
   /* Neutrals — premium, cool off-white surfaces */
   --cp-bg: #f6f8fb;

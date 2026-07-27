@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.tooling/
+.claude/
+.playwright-mcp/
+__pycache__/
+*.pyc
+.DS_Store
+*.log
+.venv/
+venv/

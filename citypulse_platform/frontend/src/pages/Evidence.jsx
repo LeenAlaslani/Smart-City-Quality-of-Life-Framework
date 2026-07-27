@@ -34,6 +34,18 @@ export default function Evidence() {
   return (
     <>
       <Head />
+
+      {/* validation status — stated plainly, once, at the top */}
+      <div className="ev-banner">
+        <Icon name="alert" size={18} />
+        <div>
+          <b>Internationally trained prototype models.</b> The four models are trained on open datasets
+          from London, New York and international building stock. They have <b>not yet been calibrated or
+          validated with local Saudi municipal datasets</b> — local validation is required before any
+          production or operational use. Platform outputs are decision-support signals, not verified forecasts.
+        </div>
+      </div>
+
       <div className="grid cols-2" style={{ marginBottom: 16 }}>
         <Card>
           <div className="between">
@@ -74,6 +86,7 @@ export default function Evidence() {
                 {m.threshold != null && <Row k="Threshold" v={m.threshold} />}
                 <Row k="Model version" v={m.version} />
                 <Row k="Deployment" v={m.deployed ? 'Deployed · live inference' : `Unavailable (${m.load_error})`} />
+                <Row k="Local validation" v="Not validated with Saudi data — required before production use" />
               </tbody>
             </table>
             <div className="mt-3">
@@ -87,15 +100,45 @@ export default function Evidence() {
           </Card>
         ))}
       </div>
+
+      {/* what local validation would require — the honest data-readiness list */}
+      <Card title="Local data readiness" sub="What is needed to calibrate and validate these models for a Saudi city" icon="layers" className="mt-4">
+        <div className="ev-ready">
+          <ReadyRow dom="mobility" need="Traffic counts, road-incident records, weather & air-quality feeds by corridor" />
+          <ReadyRow dom="energy" need="Building electricity meter data (hourly) by building type and district" />
+          <ReadyRow dom="governance" need="Municipal service-request (311-style) logs with categories and resolution times" />
+          <ReadyRow dom="waste" need="Waste tonnage by zone and month, plus collection-capacity records" />
+        </div>
+        <p className="muted mt-3" style={{ fontSize: 12.5, lineHeight: 1.5 }}>
+          Each layer above separates cleanly in the platform today: model-training provenance (this page) ·
+          selected-city profile inputs (onboarding) · scenario assumptions (City Intelligence sliders) ·
+          model output (live inference) · local validation status (not yet started).
+        </p>
+      </Card>
+
+      <style>{`
+        .ev-banner{display:flex;gap:12px;align-items:flex-start;background:var(--cp-elevated-bg);border:1px solid #ecd9ae;
+          border-radius:14px;padding:15px 17px;margin-bottom:16px;font-size:13.5px;line-height:1.55;color:#6b4c12}
+        .ev-banner svg{color:var(--cp-elevated);flex:0 0 auto;margin-top:2px}
+        .ev-ready{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-top:4px}
+        .ev-rr{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--cp-border);border-radius:11px;background:var(--cp-surface-2)}
+        .ev-rr .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:#fff;color:var(--cp-teal-600);border:1px solid var(--cp-border);flex:0 0 auto}
+        .ev-rr .t{font-size:12.5px;color:var(--cp-ink-2);line-height:1.45}
+        @media(max-width:820px){.ev-ready{grid-template-columns:1fr}}
+      `}</style>
     </>
   )
 }
+
+const ReadyRow = ({ dom, need }) => (
+  <div className="ev-rr"><span className="ic"><Icon name={DOMAIN_ICON[dom]} size={15} /></span><span className="t">{need}</span></div>
+)
 
 const Row = ({ k, v }) => (
   <tr><td style={{ color: 'var(--cp-muted)', width: '38%', padding: '7px 0', verticalAlign: 'top' }}>{k}</td>
     <td style={{ padding: '7px 0', color: 'var(--cp-ink)' }}>{v}</td></tr>
 )
 const Head = () => (
-  <div className="pagehead"><div className="eyebrow">Model &amp; Data Evidence</div><h1>Technical evidence</h1>
-    <p className="lead">For technical evaluators and data teams — datasets, algorithms, metrics and limitations behind the platform.</p></div>
+  <div className="pg"><div><div className="pg-eyebrow">Model &amp; Data Evidence</div><h1>Models, data &amp; validation</h1>
+    <p className="pg-purpose">For technical evaluators — datasets, algorithms, limitations, validation status and local data readiness.</p></div></div>
 )

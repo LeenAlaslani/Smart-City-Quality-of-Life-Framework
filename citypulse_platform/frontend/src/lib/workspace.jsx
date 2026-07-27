@@ -26,6 +26,7 @@ const seed = () => ({
       dependency: 'Budget confirmation', next: 'Shortlist buildings', domain: 'energy' },
   ],
   scenarios: [],
+  blueprint: [],
 })
 
 function dplus(d) { const t = new Date(); t.setDate(t.getDate() + d); return t.toISOString().slice(0, 10) }
@@ -34,7 +35,8 @@ export function WorkspaceProvider({ children }) {
   const [ws, setWs] = useState(() => {
     try {
       const raw = localStorage.getItem(KEY)
-      return raw ? JSON.parse(raw) : seed()
+      // merge over seed shape so new collections (e.g. blueprint) exist after upgrades
+      return raw ? { ...seed(), ...JSON.parse(raw) } : seed()
     } catch { return seed() }
   })
   useEffect(() => { localStorage.setItem(KEY, JSON.stringify(ws)) }, [ws])
@@ -49,6 +51,15 @@ export function WorkspaceProvider({ children }) {
     removeRoadmap: (id) => setWs((s) => ({ ...s, roadmap: s.roadmap.filter((x) => x.id !== id) })),
     saveScenario: (sc) => setWs((s) => ({ ...s, scenarios: [{ id: uid(), savedAt: now(), ...sc }, ...s.scenarios.filter(x => x.decisionId !== sc.decisionId)] })),
     removeScenario: (id) => setWs((s) => ({ ...s, scenarios: s.scenarios.filter((x) => x.id !== id) })),
+    // Living Blueprint — strategic initiatives with provenance & lifecycle
+    upsertBlueprint: (b) => setWs((s) => {
+      const ex = s.blueprint.find((x) => x.key && x.key === b.key)
+      return ex
+        ? { ...s, blueprint: s.blueprint.map((x) => x.id === ex.id ? { ...x, ...b } : x) }
+        : { ...s, blueprint: [{ id: uid(), status: 'Proposed', createdAt: now(), ...b }, ...s.blueprint] }
+    }),
+    updateBlueprint: (id, patch) => setWs((s) => ({ ...s, blueprint: s.blueprint.map((x) => x.id === id ? { ...x, ...patch } : x) })),
+    removeBlueprint: (id) => setWs((s) => ({ ...s, blueprint: s.blueprint.filter((x) => x.id !== id) })),
     resetWorkspace: () => setWs(seed()),
   }
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>
